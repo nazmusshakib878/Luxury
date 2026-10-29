@@ -15,6 +15,7 @@ export const AccountModal: React.FC = () => {
     loginUser,
     registerUser,
     logoutUser,
+    showToast,
   } = useShop()
 
   const [activeTab, setActiveTab] = useState<"orders" | "login" | "register">(
@@ -46,6 +47,11 @@ export const AccountModal: React.FC = () => {
       } else {
         setActiveTab("orders")
       }
+    } else {
+      showToast(
+        result.error || "Authentication failed. Please verify credentials.",
+        "error",
+      )
     }
   }
 
@@ -60,6 +66,11 @@ export const AccountModal: React.FC = () => {
     setIsSubmitting(false)
     if (result.success) {
       setActiveTab("orders")
+    } else {
+      showToast(
+        result.error || "Registration failed. Please check your details.",
+        "error",
+      )
     }
   }
 

@@ -176,10 +176,19 @@ create policy "Categories can be modified only by admins"
 -- Products RLS
 create policy "Products are viewable by everyone"
   on public.products for select
-  using (in_stock = true or public.is_admin());
+  using (true);
 
-create policy "Products can be modified only by admins"
-  on public.products for all
+create policy "Admins can insert products"
+  on public.products for insert
+  with check (public.is_admin());
+
+create policy "Admins can update products"
+  on public.products for update
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create policy "Admins can delete products"
+  on public.products for delete
   using (public.is_admin());
 
 -- Profiles RLS
@@ -239,6 +248,7 @@ create policy "Only admin can update appointments"
 -- Insert Categories
 insert into public.categories (id, name, note, image)
 values
+  ('all', 'Curated Luxury', 'All artisanal creations', 'https://images.unsplash.com/photo-1590739225287-bd31519780c3?auto=format&fit=crop&w=1000&q=85'),
   ('leather', 'The Signature Bags', 'Sculptural silhouettes', 'https://images.unsplash.com/photo-1590739225287-bd31519780c3?auto=format&fit=crop&w=1000&q=85'),
   ('fragrance', 'Fine Fragrance', 'Rare and evocative', 'https://images.unsplash.com/photo-1628001242958-957834454d40?auto=format&fit=crop&w=1000&q=85'),
   ('silk', 'Modern Icons', 'Enduring essentials', 'https://images.unsplash.com/photo-1654254124839-851f6103d1f2?auto=format&fit=crop&w=1000&q=85')

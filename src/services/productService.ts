@@ -112,7 +112,10 @@ export async function createProduct(
           name: productData.name,
           subtitle: productData.subtitle || "",
           category: productData.category,
-          category_type: productData.categoryType,
+          category_type:
+            productData.categoryType === "all"
+              ? "leather"
+              : productData.categoryType || "leather",
           price: productData.price,
           rating: productData.rating || 5.0,
           reviews_count: productData.reviewsCount || 0,

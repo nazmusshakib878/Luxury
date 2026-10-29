@@ -2,6 +2,13 @@ import React, { useState } from "react"
 import { Icon } from "../common/Icon"
 import { useShop } from "../../context/ShopContext"
 import { Product, ProductCategory, UserOrder } from "../../types"
+import {
+  getSupabaseUrl,
+  getSupabaseAnonKey,
+  isSupabaseConfigured,
+  setSupabaseCredentials,
+  testSupabaseConnection,
+} from "../../lib/supabase"
 
 export const AdminModal: React.FC = () => {
   const {
@@ -21,7 +28,19 @@ export const AdminModal: React.FC = () => {
   } = useShop()
 
   const [activeTab, setActiveTab] =
-    useState<"overview" | "orders" | "products" | "appointments">("overview")
+    useState<"overview" | "orders" | "products" | "appointments" | "api">(
+      "overview",
+    )
+
+  // API Config State
+  const [apiUrl, setApiUrl] = useState(getSupabaseUrl())
+  const [apiKey, setApiKey] = useState(getSupabaseAnonKey())
+  const [testResult, setTestResult] = useState<{
+    tested: boolean
+    success?: boolean
+    message?: string
+  }>({ tested: false })
+  const [isTesting, setIsTesting] = useState(false)
 
   // New Product Form State
   const [showAddForm, setShowAddForm] = useState(false)
@@ -105,6 +124,40 @@ export const AdminModal: React.FC = () => {
     if (tempPrice > 0) {
       await editProduct(id, { price: tempPrice })
       setEditingPriceId(null)
+    }
+  }
+
+  const handleTestApi = async () => {
+    setIsTesting(true)
+    setTestResult({ tested: false })
+    const res = await testSupabaseConnection(apiUrl, apiKey)
+    setTestResult({
+      tested: true,
+      success: res.success,
+      message: res.message,
+    })
+    setIsTesting(false)
+    if (res.success) {
+      showToast("Supabase API connected successfully!", "success")
+    } else {
+      showToast("API connection failed. Please verify credentials.", "error")
+    }
+  }
+
+  const handleSaveApi = () => {
+    if (!apiUrl.trim() || !apiKey.trim()) {
+      showToast(
+        "Please provide both Supabase Project URL and Anon Key.",
+        "error",
+      )
+      return
+    }
+    const success = setSupabaseCredentials(apiUrl, apiKey)
+    if (success) {
+      showToast("API credentials saved! Reloading live store...", "success")
+      setTimeout(() => {
+        window.location.reload()
+      }, 800)
     }
   }
 
@@ -200,6 +253,25 @@ export const AdminModal: React.FC = () => {
             📅 Salon Reservations
             <span className="bg-[#2d2a24] text-[#aa8b5f] text-[10px] px-1.5 py-0.2 rounded-full">
               {totalAppointments}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab("api")}
+            className={`px-4 py-2 text-xs font-medium uppercase tracking-wider transition-all border-b-2 flex items-center gap-1.5 ${
+              activeTab === "api"
+                ? "border-[#aa8b5f] text-[#aa8b5f] font-semibold"
+                : "border-transparent text-[#999285] hover:text-[#f7f5f0]"
+            }`}
+          >
+            ⚡ API & Database
+            <span
+              className={`text-[9px] px-1.5 py-0.2 rounded-full font-bold ${
+                isSupabaseConfigured()
+                  ? "bg-[#4caf50]/20 text-[#4caf50]"
+                  : "bg-[#e53935]/20 text-[#e53935]"
+              }`}
+            >
+              {isSupabaseConfigured() ? "LIVE" : "OFFLINE"}
             </span>
           </button>
         </div>
@@ -752,6 +824,166 @@ export const AdminModal: React.FC = () => {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* TAB 5: DATABASE & API SETTINGS */}
+        {activeTab === "api" && (
+          <div className="space-y-6">
+            {/* Status Card */}
+            <div
+              className={`p-5 border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+                isSupabaseConfigured()
+                  ? "bg-[#1b2b1b] border-[#4caf50]/40 text-[#a5d6a7]"
+                  : "bg-[#2b1f17] border-[#ff9800]/40 text-[#ffcc80]"
+              }`}
+            >
+              <div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full animate-pulse ${
+                      isSupabaseConfigured() ? "bg-[#4caf50]" : "bg-[#ff9800]"
+                    }`}
+                  ></span>
+                  <strong className="text-sm font-semibold uppercase tracking-wider">
+                    {isSupabaseConfigured()
+                      ? "LIVE Supabase Database Active"
+                      : "Offline Fallback Mode Active"}
+                  </strong>
+                </div>
+                <p className="text-xs mt-1 m-0 opacity-80">
+                  {isSupabaseConfigured()
+                    ? `Connected to: ${getSupabaseUrl()}`
+                    : "No live database credentials found. Operating safely with built-in luxury catalog & local storage."}
+                </p>
+              </div>
+
+              <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 border border-current rounded-sm">
+                {isSupabaseConfigured() ? "Live PostgreSQL" : "Local Fallback"}
+              </span>
+            </div>
+
+            {/* Connection Credentials Form */}
+            <div className="p-6 bg-[#1f1d17] border border-[#332f27] space-y-4">
+              <h4 className="text-sm font-semibold uppercase tracking-widest text-[#aa8b5f] mb-1">
+                Supabase API Connection Credentials
+              </h4>
+              <p className="text-xs text-[#8c8273]">
+                Enter your Supabase Project URL and public anon key below. These
+                can be found in your{" "}
+                <strong className="text-[#f7f5f0]">
+                  Supabase Dashboard ➔ Project Settings ➔ API
+                </strong>
+                .
+              </p>
+
+              <div className="space-y-4 pt-2">
+                <div className="form-group">
+                  <label className="text-xs text-[#8c8273] font-medium block mb-1">
+                    Supabase Project URL (VITE_SUPABASE_URL) *
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://your-project-id.supabase.co"
+                    value={apiUrl}
+                    onChange={(e) => setApiUrl(e.target.value)}
+                    className="w-full bg-[#171713] border border-[#3a362f] p-3 text-xs text-white focus:border-[#aa8b5f] outline-none"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="text-xs text-[#8c8273] font-medium block mb-1">
+                    Supabase Public Anon Key (VITE_SUPABASE_ANON_KEY) *
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    className="w-full bg-[#171713] border border-[#3a362f] p-3 text-xs text-white focus:border-[#aa8b5f] outline-none font-mono"
+                  />
+                </div>
+
+                {/* Test Result Banner */}
+                {testResult.tested && (
+                  <div
+                    className={`p-3 text-xs border ${
+                      testResult.success
+                        ? "bg-[#1b2b1b] border-[#4caf50]/40 text-[#81c784]"
+                        : "bg-[#2b1717] border-[#e53935]/40 text-[#ef9a9a]"
+                    }`}
+                  >
+                    <strong>
+                      {testResult.success
+                        ? "✓ Test Passed: "
+                        : "✕ Test Failed: "}
+                    </strong>
+                    {testResult.message}
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-3 pt-2">
+                  <button
+                    type="button"
+                    disabled={isTesting}
+                    onClick={handleTestApi}
+                    className="px-5 py-2.5 bg-transparent border border-[#aa8b5f] text-[#aa8b5f] text-xs font-semibold uppercase tracking-wider hover:bg-[#aa8b5f]/10 cursor-pointer transition-colors"
+                  >
+                    {isTesting ? "Testing Ping..." : "🔍 Test Connection"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveApi}
+                    className="px-6 py-2.5 bg-[#aa8b5f] text-[#171713] text-xs font-semibold uppercase tracking-wider hover:bg-[#c2a275] cursor-pointer transition-colors"
+                  >
+                    💾 Save Credentials & Connect
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Step-by-Step Instructions */}
+            <div className="p-6 bg-[#1f1d17] border border-[#332f27] space-y-3 text-xs text-[#a19a8d]">
+              <h4 className="text-xs uppercase tracking-widest text-[#aa8b5f] font-semibold mb-2">
+                Quick Setup Checklist
+              </h4>
+              <ol className="list-decimal pl-4 space-y-2 text-[#b0a89b]">
+                <li>
+                  Open your{" "}
+                  <a
+                    href="https://supabase.com/dashboard"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[#aa8b5f] underline"
+                  >
+                    Supabase Dashboard
+                  </a>
+                  .
+                </li>
+                <li>
+                  Go to <strong className="text-[#f7f5f0]">SQL Editor</strong>{" "}
+                  and run the schema file from{" "}
+                  <code className="text-[#aa8b5f]">supabase/schema.sql</code>.
+                </li>
+                <li>
+                  Go to{" "}
+                  <strong className="text-[#f7f5f0]">
+                    Project Settings ➔ API
+                  </strong>
+                  , copy the{" "}
+                  <strong className="text-[#f7f5f0]">Project URL</strong> and{" "}
+                  <strong className="text-[#f7f5f0]">anon public key</strong>,
+                  and paste them above.
+                </li>
+                <li>
+                  Click{" "}
+                  <strong className="text-[#aa8b5f]">
+                    "Save Credentials & Connect"
+                  </strong>
+                  .
+                </li>
+              </ol>
+            </div>
           </div>
         )}
       </div>
