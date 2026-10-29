@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aurélia Maison Paris</title>
+    <script>
+      // Single Page Application route redirect fallback for Netlify & static hosts
+      sessionStorage.redirect = location.href;
+      var path = window.location.pathname;
+      var search = window.location.search || '';
+      var hash = window.location.hash || '';
+      window.location.replace('/' + (path.startsWith('/') ? path.slice(1) : path) + search + hash);
+    </script>
+    <meta http-equiv="refresh" content="0;URL='/'">
+  </head>
+  <body>
+    <div style="font-family: sans-serif; text-align: center; padding: 40px; color: #171713;">
+      <h2>Loading Atelier Aurélia Paris...</h2>
+      <p>Redirecting to destination...</p>
+    </div>
+  </body>
+</html>

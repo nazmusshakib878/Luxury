@@ -61,7 +61,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
 
       {/* Center Auth Card */}
       <div className="max-w-md w-full mx-auto my-auto py-8">
-        <div className="bg-[#171713] border border-[#3a362f] p-8 md:p-10 shadow-2xl relative animate-fadeIn rounded-xs">
+        <div className="bg-[#171713] border border-[#3a362f] p-5 sm:p-8 md:p-10 shadow-2xl relative animate-fadeIn rounded-xs">
           {/* Brand Crest */}
           <div className="text-center mb-8">
             <span className="text-[11px] uppercase tracking-widest font-bold text-[#aa8b5f] block mb-1">

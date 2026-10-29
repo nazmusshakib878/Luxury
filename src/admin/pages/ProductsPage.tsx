@@ -196,7 +196,7 @@ export const ProductsPage: React.FC<ProductsPageProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Filter and Actions Bar */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#171713] p-6 border border-[#2d2a24]">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#171713] p-4 sm:p-6 border border-[#2d2a24]">
         <div className="flex flex-wrap items-center gap-3">
           {/* Category Filter */}
           <select

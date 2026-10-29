@@ -577,6 +577,48 @@
   }
 }
 
+@media (max-width: 640px) {
+  .luxury-modal {
+    width: 96vw;
+    max-height: 94vh;
+    padding: 20px 16px !important;
+  }
+  .modal-close-corner {
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+  }
+  .drawer-panel {
+    width: 100vw;
+  }
+  .drawer-header {
+    height: 64px;
+    padding: 0 16px;
+  }
+  .drawer-body {
+    padding: 18px 16px;
+    gap: 16px;
+  }
+  .drawer-footer {
+    padding: 16px;
+  }
+  .cart-row {
+    grid-template-columns: 70px 1fr auto;
+    gap: 12px;
+  }
+  .cart-row-img {
+    width: 70px;
+    height: 85px;
+  }
+  .toast-container {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    max-width: none;
+  }
+}
+
 /* Floating Scroll to Top Button */
 .scroll-to-top-btn {
   position: fixed;

@@ -103,7 +103,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Banner & Export Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#171713] p-6 border border-[#2d2a24]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#171713] p-4 sm:p-6 border border-[#2d2a24]">
         <div>
           <h3 className="font-['Cormorant_Garamond',serif] text-2xl text-white m-0">
             Executive Financial Analytics & CSV Reports
@@ -131,7 +131,7 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({
       </div>
 
       {/* Financial Breakdown KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-[#171713] p-5 border border-[#2d2a24]">
           <span className="text-[10px] uppercase font-bold tracking-widest text-[#8c8273]">
             Gross Sales Volume

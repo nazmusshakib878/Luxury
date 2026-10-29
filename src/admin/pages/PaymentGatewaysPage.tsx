@@ -86,7 +86,7 @@ export const PaymentGatewaysPage: React.FC<PaymentGatewaysPageProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn max-w-5xl">
       {/* Header Banner */}
-      <div className="bg-[#171713] p-6 border border-[#2d2a24] flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#171713] p-4 sm:p-6 border border-[#2d2a24] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h3 className="font-['Cormorant_Garamond',serif] text-2xl text-white m-0">
             Payment Gateways & Financial Settlement

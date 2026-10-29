@@ -41,7 +41,7 @@ export const AdminProfilePage: React.FC<AdminProfilePageProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn max-w-3xl">
-      <div className="bg-[#171713] p-6 border border-[#2d2a24]">
+      <div className="bg-[#171713] p-4 sm:p-6 border border-[#2d2a24]">
         <h3 className="font-['Cormorant_Garamond',serif] text-2xl text-white m-0">
           Administrator Credentials & Backoffice Security
         </h3>

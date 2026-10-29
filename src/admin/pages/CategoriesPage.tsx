@@ -74,7 +74,7 @@ export const CategoriesPage: React.FC<CategoriesPageProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Action Bar */}
-      <div className="flex justify-between items-center bg-[#171713] p-6 border border-[#2d2a24]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-[#171713] p-4 sm:p-6 border border-[#2d2a24]">
         <div>
           <h3 className="font-['Cormorant_Garamond',serif] text-2xl text-white m-0">
             Maison Categories & Collections

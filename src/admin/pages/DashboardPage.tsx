@@ -43,7 +43,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Date Filter & Welcome Banner */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#171713] p-6 border border-[#2d2a24]">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#171713] p-4 sm:p-6 border border-[#2d2a24]">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[#aa8b5f] text-xs uppercase tracking-widest font-semibold flex items-center gap-1.5">
@@ -60,7 +60,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         {/* Date Filters */}
-        <div className="flex items-center bg-[#100f0c] p-1 border border-[#332f27] rounded-xs text-xs">
+        <div className="flex items-center bg-[#100f0c] p-1 border border-[#332f27] rounded-xs text-xs overflow-x-auto max-w-full">
           <button
             onClick={() => setDateFilter("today")}
             className={`px-3 py-1.5 rounded-xs transition-colors cursor-pointer ${
@@ -353,7 +353,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               {orders.slice(0, 4).map((order) => (
                 <div
                   key={order.id}
-                  className="p-3.5 bg-[#1f1d17] border border-[#2d2a24] hover:border-[#443e33] transition-colors flex justify-between items-center text-xs"
+                  className="p-3 sm:p-3.5 bg-[#1f1d17] border border-[#2d2a24] hover:border-[#443e33] transition-colors flex flex-col sm:flex-row justify-between sm:items-center gap-2.5 text-xs"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-[#12110e] border border-[#2d2a24] flex items-center justify-center shrink-0">

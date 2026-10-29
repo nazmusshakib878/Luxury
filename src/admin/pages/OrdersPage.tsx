@@ -92,7 +92,7 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Status Tabs Navigation */}
-      <div className="bg-[#171713] border border-[#2d2a24] p-2 flex flex-wrap gap-2 text-xs">
+      <div className="bg-[#171713] border border-[#2d2a24] p-2 flex overflow-x-auto whitespace-nowrap gap-2 text-xs scrollbar-none">
         {[
           { id: "all", label: "All Orders", count: orders.length },
           {

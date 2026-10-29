@@ -55,7 +55,7 @@ export const InventoryPage: React.FC<InventoryPageProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Filter Buttons */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#171713] p-6 border border-[#2d2a24]">
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#171713] p-4 sm:p-6 border border-[#2d2a24]">
         <div className="flex items-center gap-2 text-xs">
           <button
             onClick={() => setFilterType("all")}
