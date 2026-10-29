@@ -95,7 +95,7 @@ const DEFAULT_ORDERS: UserOrder[] = [
       },
     ],
     total: 1280,
-    trackingNumber: "PAR-DHL-994821",
+    trackingNumber: "DAC-EXP-994821",
   },
 ]
 
@@ -345,8 +345,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const formatPrice = (priceUSD: number) => {
     const converted = priceUSD * currency.rate
-    if (currency.code === "JPY") {
-      return `${currency.symbol}${Math.round(converted).toLocaleString()}`
+    if (currency.code === "BDT") {
+      return `${currency.symbol}${Math.round(converted).toLocaleString("en-IN")}`
     }
     return `${currency.symbol}${Math.round(converted).toLocaleString()}`
   }
@@ -367,7 +367,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         image: item.product.image,
       })),
       total: cartFinalTotal,
-      trackingNumber: `PAR-VIP-${Math.floor(100000 + Math.random() * 900000)}`,
+      trackingNumber: `DAC-VIP-${Math.floor(100000 + Math.random() * 900000)}`,
     }
 
     setOrders((prev) => [newOrder, ...prev])

@@ -15,7 +15,7 @@ export const AccountModal: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"login" | "register" | "orders">(
     "orders",
   )
-  const [email, setEmail] = useState("vip.client@aurelia.com")
+  const [email, setEmail] = useState("vip.client@aurelia.com.bd")
   const [password, setPassword] = useState("••••••••")
   const [isLoggedIn, setIsLoggedIn] = useState(true)
 
@@ -232,11 +232,11 @@ export const AccountModal: React.FC = () => {
             <div className="form-grid">
               <div className="form-group">
                 <label>First Name</label>
-                <input type="text" required placeholder="Claire" />
+                <input type="text" required placeholder="Shakib" />
               </div>
               <div className="form-group">
                 <label>Last Name</label>
-                <input type="text" required placeholder="Dubois" />
+                <input type="text" required placeholder="Ahmed" />
               </div>
             </div>
             <div className="form-group">
@@ -244,7 +244,7 @@ export const AccountModal: React.FC = () => {
               <input
                 type="email"
                 required
-                placeholder="claire.dubois@paris.fr"
+                placeholder="shakib.ahmed@aurelia.com.bd"
               />
             </div>
             <div className="form-group">

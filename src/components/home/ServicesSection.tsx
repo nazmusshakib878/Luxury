@@ -39,7 +39,7 @@ export const ServicesSection: React.FC = () => {
           <h3>Signature delivery</h3>
           <p>
             Enclosed in signature linen boxes with silk ribbon. Complimentary
-            carbon-neutral shipping worldwide.
+            white-glove courier delivery across Dhaka & all 64 districts.
           </p>
         </article>
         <article>
@@ -49,7 +49,7 @@ export const ServicesSection: React.FC = () => {
           <h3>Private service</h3>
           <p>
             Dedicated client advisors available 7 days a week. Private
-            appointments available at our Parisian salons.
+            appointments available at our Gulshan & Banani salons.
           </p>
           <button
             onClick={() => setIsAppointmentOpen(true)}

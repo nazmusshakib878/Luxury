@@ -53,7 +53,7 @@ export const Footer: React.FC = () => {
           </div>
           <div>
             <h3>Client services</h3>
-            <a href="mailto:concierge@aurelia-maison.com">Contact concierge</a>
+            <a href="mailto:concierge@aurelia.com.bd">Contact concierge</a>
             <a href="#service">Delivery & returns</a>
             <button
               onClick={() => setIsAppointmentOpen(true)}

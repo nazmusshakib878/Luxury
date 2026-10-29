@@ -5,7 +5,7 @@ import { useShop } from "../../context/ShopContext"
 export const AppointmentModal: React.FC = () => {
   const { isAppointmentOpen, setIsAppointmentOpen, bookAppointment } = useShop()
 
-  const [city, setCity] = useState("Paris — Place Vendôme")
+  const [city, setCity] = useState("Dhaka — Gulshan 2 Salon")
   const [date, setDate] = useState("2026-11-15")
   const [time, setTime] = useState("14:30")
   const [advisor, setAdvisor] = useState("Haute Maroquinerie Specialist")
@@ -101,10 +101,10 @@ export const AppointmentModal: React.FC = () => {
               <div className="form-group">
                 <label>Salon Location</label>
                 <select value={city} onChange={(e) => setCity(e.target.value)}>
+                  <option>Dhaka — Gulshan 2 Salon</option>
+                  <option>Dhaka — Banani 11 Atelier</option>
+                  <option>Chattogram — Nasirabad Salon</option>
                   <option>Paris — Place Vendôme</option>
-                  <option>New York — Madison Avenue</option>
-                  <option>London — New Bond Street</option>
-                  <option>Tokyo — Ginza Central</option>
                 </select>
               </div>
 
@@ -146,7 +146,7 @@ export const AppointmentModal: React.FC = () => {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Adrienne Vance"
+                  placeholder="e.g. Nazmus Shakib"
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                 />
@@ -157,7 +157,7 @@ export const AppointmentModal: React.FC = () => {
                 <input
                   type="email"
                   required
-                  placeholder="adrienne@maison.com"
+                  placeholder="shakib@aurelia.com.bd"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -168,7 +168,7 @@ export const AppointmentModal: React.FC = () => {
                 <input
                   type="tel"
                   required
-                  placeholder="+33 1 42 68 00 00"
+                  placeholder="+880 1700 000000"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />

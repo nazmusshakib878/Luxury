@@ -23,12 +23,12 @@ export const CheckoutModal: React.FC = () => {
   const [createdOrder, setCreatedOrder] = useState<UserOrder | null>(null)
 
   // Form states
-  const [fullName, setFullName] = useState("Camille Laurent")
-  const [email, setEmail] = useState("camille.laurent@paris.fr")
-  const [address, setAddress] = useState("18 Place Vendôme")
-  const [city, setCity] = useState("Paris")
-  const [postalCode, setPostalCode] = useState("75001")
-  const [country, setCountry] = useState("France")
+  const [fullName, setFullName] = useState("Nazmus Shakib")
+  const [email, setEmail] = useState("shakib@aurelia.com.bd")
+  const [address, setAddress] = useState("House 14, Road 71, Gulshan-2")
+  const [city, setCity] = useState("Dhaka")
+  const [postalCode, setPostalCode] = useState("1212")
+  const [country, setCountry] = useState("Bangladesh")
   const [cardNumber, setCardNumber] = useState("•••• •••• •••• 4242")
   const [cardExp, setCardExp] = useState("08/29")
   const [cardCvc, setCardCvc] = useState("892")
@@ -150,13 +150,13 @@ export const CheckoutModal: React.FC = () => {
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                 >
-                  <option>France</option>
+                  <option>Bangladesh</option>
                   <option>United States</option>
                   <option>United Kingdom</option>
-                  <option>Italy</option>
-                  <option>Switzerland</option>
-                  <option>Japan</option>
                   <option>United Arab Emirates</option>
+                  <option>France</option>
+                  <option>Singapore</option>
+                  <option>Canada</option>
                 </select>
               </div>
             </div>
