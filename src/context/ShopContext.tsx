@@ -24,6 +24,11 @@ interface ShopContextType {
   clearCart: () => void
   cartCount: number
   cartSubtotal: number
+  cartFinalTotal: number
+  promoCode: string
+  discountPercent: number
+  discountAmount: number
+  applyPromoCode: (code: string) => boolean
 
   // Wishlist
   wishlist: number[]
@@ -60,6 +65,7 @@ interface ShopContextType {
   setIsCurrencyModalOpen: (open: boolean) => void
   quickViewProduct: Product | null
   setQuickViewProduct: (p: Product | null) => void
+  closeAllModals: () => void
 
   // Toasts
   toasts: ToastMessage[]
@@ -75,10 +81,28 @@ interface ShopContextType {
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined)
 
+const DEFAULT_ORDERS: UserOrder[] = [
+  {
+    id: "AUR-892410",
+    date: "October 14, 2026",
+    status: "Delivered",
+    items: [
+      {
+        productName: "Élan Sculpted Tote",
+        quantity: 1,
+        price: 1280,
+        image: products[0].image,
+      },
+    ],
+    total: 1280,
+    trackingNumber: "PAR-DHL-994821",
+  },
+]
+
 export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  // Initialize cart from localStorage if present
+  // Initialize cart from localStorage
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem("aurelia_cart")
@@ -88,7 +112,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   })
 
-  // Initialize wishlist from localStorage if present
+  // Initialize wishlist from localStorage
   const [wishlist, setWishlist] = useState<number[]>(() => {
     try {
       const saved = localStorage.getItem("aurelia_wishlist")
@@ -97,6 +121,30 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
       return [1]
     }
   })
+
+  // Initialize orders from localStorage
+  const [orders, setOrders] = useState<UserOrder[]>(() => {
+    try {
+      const saved = localStorage.getItem("aurelia_orders")
+      return saved ? JSON.parse(saved) : DEFAULT_ORDERS
+    } catch {
+      return DEFAULT_ORDERS
+    }
+  })
+
+  // Initialize appointments from localStorage
+  const [appointments, setAppointments] = useState<AppointmentData[]>(() => {
+    try {
+      const saved = localStorage.getItem("aurelia_appointments")
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+
+  // Promo code & discount state
+  const [promoCode, setPromoCode] = useState("")
+  const [discountPercent, setDiscountPercent] = useState(0)
 
   const [currency, setCurrency] = useState<Currency>(currencies[0])
   const [activeCategory, setActiveCategory] = useState<ProductCategory>("all")
@@ -115,28 +163,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
-  // Orders
-  const [orders, setOrders] = useState<UserOrder[]>([
-    {
-      id: "AUR-892410",
-      date: "October 14, 2026",
-      status: "Delivered",
-      items: [
-        {
-          productName: "Élan Sculpted Tote",
-          quantity: 1,
-          price: 1280,
-          image: products[0].image,
-        },
-      ],
-      total: 1280,
-      trackingNumber: "PAR-DHL-994821",
-    },
-  ])
-
-  // Appointments
-  const [appointments, setAppointments] = useState<AppointmentData[]>([])
-
+  // Persistence effects
   useEffect(() => {
     try {
       localStorage.setItem("aurelia_cart", JSON.stringify(cart))
@@ -152,6 +179,65 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
       console.warn("Could not save wishlist", e)
     }
   }, [wishlist])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("aurelia_orders", JSON.stringify(orders))
+    } catch (e) {
+      console.warn("Could not save orders", e)
+    }
+  }, [orders])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("aurelia_appointments", JSON.stringify(appointments))
+    } catch (e) {
+      console.warn("Could not save appointments", e)
+    }
+  }, [appointments])
+
+  // Body scroll lock & Escape key handler
+  const isAnyModalOpen =
+    isCartOpen ||
+    isWishlistOpen ||
+    isSearchOpen ||
+    isAccountOpen ||
+    isAppointmentOpen ||
+    isCheckoutOpen ||
+    isCurrencyModalOpen ||
+    Boolean(quickViewProduct)
+
+  const closeAllModals = () => {
+    setIsCartOpen(false)
+    setIsWishlistOpen(false)
+    setIsSearchOpen(false)
+    setIsAccountOpen(false)
+    setIsAppointmentOpen(false)
+    setIsCheckoutOpen(false)
+    setIsCurrencyModalOpen(false)
+    setQuickViewProduct(null)
+  }
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [isAnyModalOpen])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isAnyModalOpen) {
+        closeAllModals()
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isAnyModalOpen])
 
   const showToast = (
     text: string,
@@ -170,6 +256,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   const addToCart = (product: Product, quantity = 1, selectedSize?: string) => {
+    const safeQty = Math.max(1, quantity)
     setCart((prev) => {
       const existing = prev.find(
         (item) =>
@@ -178,11 +265,11 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
       if (existing) {
         return prev.map((item) =>
           item.product.id === product.id && item.selectedSize === selectedSize
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: item.quantity + safeQty }
             : item,
         )
       }
-      return [...prev, { product, quantity, selectedSize }]
+      return [...prev, { product, quantity: safeQty, selectedSize }]
     })
     showToast(`Added "${product.name}" to bag`)
   }
@@ -234,6 +321,28 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
     0,
   )
 
+  const discountAmount =
+    discountPercent > 0 ? (cartSubtotal * discountPercent) / 100 : 0
+  const cartFinalTotal = Math.max(0, cartSubtotal - discountAmount)
+
+  const applyPromoCode = (code: string): boolean => {
+    const clean = code.trim().toUpperCase()
+    if (clean === "MAISON10") {
+      setPromoCode("MAISON10")
+      setDiscountPercent(10)
+      showToast("Promo 'MAISON10' applied: 10% privilege discount!")
+      return true
+    } else if (clean === "AURELIA20") {
+      setPromoCode("AURELIA20")
+      setDiscountPercent(20)
+      showToast("VIP Promo 'AURELIA20' applied: 20% discount!")
+      return true
+    } else {
+      showToast("Invalid promotion code. Try 'MAISON10'", "error")
+      return false
+    }
+  }
+
   const formatPrice = (priceUSD: number) => {
     const converted = priceUSD * currency.rate
     if (currency.code === "JPY") {
@@ -257,7 +366,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         price: item.product.price,
         image: item.product.image,
       })),
-      total: cartSubtotal,
+      total: cartFinalTotal,
       trackingNumber: `PAR-VIP-${Math.floor(100000 + Math.random() * 900000)}`,
     }
 
@@ -283,6 +392,11 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         clearCart,
         cartCount,
         cartSubtotal,
+        cartFinalTotal,
+        promoCode,
+        discountPercent,
+        discountAmount,
+        applyPromoCode,
         wishlist,
         toggleWishlist,
         isWishlisted,
@@ -309,6 +423,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsCurrencyModalOpen,
         quickViewProduct,
         setQuickViewProduct,
+        closeAllModals,
         toasts,
         showToast,
         removeToast,

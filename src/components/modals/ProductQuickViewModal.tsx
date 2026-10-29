@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Icon } from "../common/Icon"
 import { useShop } from "../../context/ShopContext"
 
@@ -14,6 +14,13 @@ export const ProductQuickViewModal: React.FC = () => {
 
   const [quantity, setQuantity] = useState(1)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
+
+  useEffect(() => {
+    if (quickViewProduct) {
+      setQuantity(1)
+      setActiveImageIndex(0)
+    }
+  }, [quickViewProduct])
 
   if (!quickViewProduct) return null
 

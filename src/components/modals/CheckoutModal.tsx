@@ -9,6 +9,9 @@ export const CheckoutModal: React.FC = () => {
     setIsCheckoutOpen,
     cart,
     cartSubtotal,
+    cartFinalTotal,
+    discountPercent,
+    discountAmount,
     formatPrice,
     createOrder,
     showToast,
@@ -164,8 +167,14 @@ export const CheckoutModal: React.FC = () => {
                   Acquisition Total
                 </span>
                 <strong className="text-lg font-semibold">
-                  {formatPrice(cartSubtotal)}
+                  {formatPrice(cartFinalTotal)}
                 </strong>
+                {discountPercent > 0 && (
+                  <span className="text-[10px] text-[#8c6e49] block">
+                    Includes {discountPercent}% privilege savings (-
+                    {formatPrice(discountAmount)})
+                  </span>
+                )}
               </div>
               <button type="submit" className="button button-dark !px-8">
                 Continue to Payment <Icon name="arrow" size={16} />
@@ -236,7 +245,7 @@ export const CheckoutModal: React.FC = () => {
                 ← Back to Shipping
               </button>
               <button type="submit" className="button button-dark !px-8">
-                Complete Acquisition ({formatPrice(cartSubtotal)})
+                Complete Acquisition ({formatPrice(cartFinalTotal)})
               </button>
             </div>
           </form>

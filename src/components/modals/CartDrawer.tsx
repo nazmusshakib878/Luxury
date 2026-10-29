@@ -11,13 +11,15 @@ export const CartDrawer: React.FC = () => {
     removeFromCart,
     cartCount,
     cartSubtotal,
+    cartFinalTotal,
+    discountPercent,
+    discountAmount,
+    applyPromoCode,
     formatPrice,
     setIsCheckoutOpen,
-    showToast,
   } = useShop()
 
-  const [promoCode, setPromoCode] = useState("")
-  const [discountPercent, setDiscountPercent] = useState(0)
+  const [inputCode, setInputCode] = useState("")
 
   if (!isCartOpen) return null
 
@@ -27,23 +29,12 @@ export const CartDrawer: React.FC = () => {
     Math.round((cartSubtotal / freeDeliveryThreshold) * 100),
   )
 
-  const applyPromo = (e: React.FormEvent) => {
+  const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault()
-    if (promoCode.trim().toUpperCase() === "MAISON10") {
-      setDiscountPercent(10)
-      showToast("Promo 'MAISON10' applied: 10% privilege discount!")
-    } else if (promoCode.trim().toUpperCase() === "AURELIA20") {
-      setDiscountPercent(20)
-      showToast("VIP Promo 'AURELIA20' applied: 20% discount!")
-    } else {
-      showToast("Invalid promotion code. Try 'MAISON10'", "error")
+    if (inputCode.trim()) {
+      applyPromoCode(inputCode)
     }
   }
-
-  const finalTotal =
-    discountPercent > 0
-      ? cartSubtotal * (1 - discountPercent / 100)
-      : cartSubtotal
 
   const handleProceedToCheckout = () => {
     setIsCartOpen(false)
@@ -158,12 +149,12 @@ export const CartDrawer: React.FC = () => {
         {cart.length > 0 && (
           <div className="drawer-footer">
             {/* Promo Code */}
-            <form onSubmit={applyPromo} className="flex gap-2">
+            <form onSubmit={handleApplyPromo} className="flex gap-2">
               <input
                 type="text"
                 placeholder="Promo code (try MAISON10)"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
+                value={inputCode}
+                onChange={(e) => setInputCode(e.target.value)}
                 className="flex-1 border border-[var(--line)] px-3 py-2 text-xs bg-white uppercase tracking-wider"
               />
               <button
@@ -182,9 +173,7 @@ export const CartDrawer: React.FC = () => {
               {discountPercent > 0 && (
                 <div className="flex justify-between text-[#8c6e49] font-medium">
                   <span>Privilege savings ({discountPercent}%)</span>
-                  <span>
-                    -{formatPrice((cartSubtotal * discountPercent) / 100)}
-                  </span>
+                  <span>-{formatPrice(discountAmount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-[#7c7468]">
@@ -195,7 +184,7 @@ export const CartDrawer: React.FC = () => {
               </div>
               <div className="flex justify-between font-semibold text-base pt-2 border-t border-[var(--line)] text-[var(--ink)]">
                 <span>Estimated Total</span>
-                <span>{formatPrice(finalTotal)}</span>
+                <span>{formatPrice(cartFinalTotal)}</span>
               </div>
             </div>
 

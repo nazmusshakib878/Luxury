@@ -62,6 +62,12 @@ export const SearchModal: React.FC = () => {
             placeholder="Search by piece, fragrance, or material..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && filtered.length > 0) {
+                setIsSearchOpen(false)
+                setQuickViewProduct(filtered[0])
+              }
+            }}
           />
           {query && (
             <button

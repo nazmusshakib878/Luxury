@@ -404,8 +404,8 @@ h1, h2 { font-family: 'Cormorant Garamond', serif; font-weight: 400; }
   .hero-copy { padding-left: 5vw; }
   .category-card { min-height: 440px; }
   .product-image { height: 340px; }
-  .product-tabs { display: none; }
-  .product-heading { grid-template-columns: 1fr 1fr; }
+  .product-tabs { display: flex; overflow-x: auto; max-width: 100%; white-space: nowrap; gap: 16px; padding-bottom: 4px; }
+  .product-heading { grid-template-columns: 1fr; gap: 20px; }
   .campaign-copy { padding: 8vw 5vw; }
 }
 
