@@ -406,3 +406,98 @@ values
   )
 on conflict (id) do nothing;
 
+-- ====================================================================
+-- 6. ADVANCED ADMIN MODULES (COUPONS, REVIEWS, INVENTORY, SETTINGS)
+-- ====================================================================
+
+-- G. Coupons Table
+create table if not exists public.coupons (
+    id uuid default gen_random_uuid() primary key,
+    code text unique not null,
+    discount_type text default 'percentage' check (discount_type in ('percentage', 'fixed')),
+    discount_value numeric(10, 2) not null check (discount_value > 0),
+    min_order_amount numeric(10, 2) default 0,
+    usage_limit integer,
+    usage_count integer default 0,
+    is_active boolean default true not null,
+    expires_at timestamp with time zone,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- H. Product Reviews Table
+create table if not exists public.product_reviews (
+    id uuid default gen_random_uuid() primary key,
+    product_id bigint references public.products(id) on delete cascade,
+    customer_name text not null,
+    customer_email text,
+    rating integer check (rating >= 1 and rating <= 5) not null,
+    comment text not null,
+    status text default 'approved' check (status in ('pending', 'approved', 'rejected')),
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- I. Inventory Movement Logs Table
+create table if not exists public.inventory_logs (
+    id uuid default gen_random_uuid() primary key,
+    product_id bigint references public.products(id) on delete cascade,
+    change_type text not null check (change_type in ('restock', 'sale', 'adjustment', 'return')),
+    quantity_delta integer not null,
+    new_quantity integer not null check (new_quantity >= 0),
+    reason text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- J. Store Settings Table
+create table if not exists public.store_settings (
+    id text primary key default 'main_store',
+    store_name text default 'Aurélia Maison Paris',
+    support_email text default 'concierge@aurelia.com.bd',
+    support_phone text default '+880 1700-AURELIA',
+    store_address text default 'Gulshan Avenue, Dhaka 1212, Bangladesh',
+    currency_symbol text default '৳',
+    delivery_charge_dhaka numeric(10, 2) default 80,
+    delivery_charge_outside numeric(10, 2) default 150,
+    free_shipping_threshold numeric(10, 2) default 20000,
+    low_stock_threshold integer default 5,
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- RLS for new modules
+alter table public.coupons enable row level security;
+alter table public.product_reviews enable row level security;
+alter table public.inventory_logs enable row level security;
+alter table public.store_settings enable row level security;
+
+-- Coupons RLS: Public can read active coupons; only admin can modify
+create policy "Anyone can read active coupons" on public.coupons for select using (is_active = true or public.is_admin());
+create policy "Only admin can insert coupons" on public.coupons for insert with check (public.is_admin());
+create policy "Only admin can update coupons" on public.coupons for update using (public.is_admin()) with check (public.is_admin());
+create policy "Only admin can delete coupons" on public.coupons for delete using (public.is_admin());
+
+-- Reviews RLS: Public can read approved reviews, customers can insert, admins can manage
+create policy "Public can view approved reviews" on public.product_reviews for select using (status = 'approved' or public.is_admin());
+create policy "Anyone can create a review" on public.product_reviews for insert with check (true);
+create policy "Admins can manage reviews" on public.product_reviews for update using (public.is_admin());
+create policy "Admins can delete reviews" on public.product_reviews for delete using (public.is_admin());
+
+-- Inventory Logs RLS: Only admin
+create policy "Only admin can view inventory logs" on public.inventory_logs for select using (public.is_admin());
+create policy "Only admin can insert inventory logs" on public.inventory_logs for insert with check (public.is_admin());
+
+-- Store Settings RLS: Anyone can read, only admin can update
+create policy "Anyone can view store settings" on public.store_settings for select using (true);
+create policy "Only admin can update store settings" on public.store_settings for update using (public.is_admin());
+
+-- Initial Seeds for Coupons & Settings
+insert into public.coupons (code, discount_type, discount_value, min_order_amount, is_active)
+values
+  ('AURELIA10', 'percentage', 10, 5000, true),
+  ('DHAKA20', 'percentage', 20, 15000, true),
+  ('VIPLUXURY', 'fixed', 2500, 20000, true)
+on conflict (code) do nothing;
+
+insert into public.store_settings (id, store_name, support_email, support_phone, store_address)
+values ('main_store', 'Aurélia Maison Paris', 'concierge@aurelia.com.bd', '+880 1700-AURELIA', 'Gulshan Avenue, Dhaka 1212, Bangladesh')
+on conflict (id) do nothing;
+
+

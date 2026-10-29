@@ -43,7 +43,7 @@ export const AccountModal: React.FC = () => {
     if (result.success) {
       if (result.isAdmin) {
         setIsAccountOpen(false)
-        setIsAdminOpen(true)
+        window.location.href = "/atelier-admin"
       } else {
         setActiveTab("orders")
       }
@@ -120,15 +120,12 @@ export const AccountModal: React.FC = () => {
                 salon bookings.
               </p>
             </div>
-            <button
-              onClick={() => {
-                setIsAccountOpen(false)
-                setIsAdminOpen(true)
-              }}
-              className="px-4 py-2 bg-[#aa8b5f] text-[#171713] text-xs font-semibold uppercase tracking-wider hover:bg-[#c2a275] whitespace-nowrap cursor-pointer transition-colors"
+            <a
+              href="/atelier-admin"
+              className="px-4 py-2 bg-[#aa8b5f] text-[#171713] text-xs font-semibold uppercase tracking-wider hover:bg-[#c2a275] whitespace-nowrap cursor-pointer transition-colors block text-center"
             >
               Open Admin Portal ➔
-            </button>
+            </a>
           </div>
         )}
 

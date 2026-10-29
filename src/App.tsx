@@ -1,4 +1,5 @@
 import React from "react"
+import { Routes, Route } from "react-router-dom"
 import { ShopProvider } from "./context/ShopContext"
 import { AnnouncementBar } from "./components/layout/AnnouncementBar"
 import { Navbar } from "./components/layout/Navbar"
@@ -17,14 +18,16 @@ import { WishlistDrawer } from "./components/modals/WishlistDrawer"
 import { SearchModal } from "./components/modals/SearchModal"
 import { ProductQuickViewModal } from "./components/modals/ProductQuickViewModal"
 import { AccountModal } from "./components/modals/AccountModal"
-import { AdminModal } from "./components/modals/AdminModal"
 import { AppointmentModal } from "./components/modals/AppointmentModal"
 import { CheckoutModal } from "./components/modals/CheckoutModal"
 import { CurrencyModal } from "./components/modals/CurrencyModal"
 import { ToastContainer } from "./components/common/Toast"
 import { ScrollToTop } from "./components/common/ScrollToTop"
 
-function AureliaApp() {
+// Dedicated Full-Page Admin Backoffice
+import { AdminApp } from "./admin/AdminApp"
+
+function AureliaStorefront() {
   return (
     <div className="site-shell" id="top">
       <AnnouncementBar />
@@ -50,7 +53,6 @@ function AureliaApp() {
       <SearchModal />
       <ProductQuickViewModal />
       <AccountModal />
-      <AdminModal />
       <AppointmentModal />
       <CheckoutModal />
       <CurrencyModal />
@@ -63,7 +65,13 @@ function AureliaApp() {
 export default function App() {
   return (
     <ShopProvider>
-      <AureliaApp />
+      <Routes>
+        {/* Dedicated Admin Portal Route (Full-Page Standalone Backoffice) */}
+        <Route path="/atelier-admin/*" element={<AdminApp />} />
+
+        {/* Boutique Customer Storefront Route */}
+        <Route path="/*" element={<AureliaStorefront />} />
+      </Routes>
     </ShopProvider>
   )
 }
