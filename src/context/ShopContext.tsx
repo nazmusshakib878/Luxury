@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react"
 import {
   Product,
+  Category,
   CartItem,
   Currency,
   ProductCategory,
@@ -9,9 +10,20 @@ import {
   AppointmentData,
 } from "../types"
 import { currencies } from "../data/currencies"
-import { products } from "../data/products"
+import { products as initialProducts } from "../data/products"
+import { categories as initialCategories } from "../data/categories"
+import { isSupabaseConfigured, supabase } from "../lib/supabase"
+import { getProducts, getCategories } from "../services/productService"
+import { saveOrderToDatabase } from "../services/orderService"
+import { saveAppointmentToDatabase } from "../services/appointmentService"
 
 interface ShopContextType {
+  // Products & Categories (Supabase + Local fallback)
+  products: Product[]
+  categories: Category[]
+  isDbConnected: boolean
+  isLoadingProducts: boolean
+
   // Cart
   cart: CartItem[]
   addToCart: (
@@ -77,6 +89,9 @@ interface ShopContextType {
   createOrder: (shippingDetails: any) => UserOrder
   appointments: AppointmentData[]
   bookAppointment: (data: AppointmentData) => void
+
+  // Auth User State
+  authUser: any | null
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined)
@@ -91,7 +106,7 @@ const DEFAULT_ORDERS: UserOrder[] = [
         productName: "Élan Sculpted Tote",
         quantity: 1,
         price: 1280,
-        image: products[0].image,
+        image: initialProducts[0].image,
       },
     ],
     total: 1280,
@@ -102,6 +117,15 @@ const DEFAULT_ORDERS: UserOrder[] = [
 export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // Products & Categories loaded from Supabase or Fallback
+  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const [categories, setCategories] = useState<Category[]>(initialCategories)
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false)
+  const [isDbConnected, setIsDbConnected] = useState<boolean>(
+    isSupabaseConfigured(),
+  )
+  const [authUser, setAuthUser] = useState<any | null>(null)
+
   // Initialize cart from localStorage
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
@@ -162,6 +186,55 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([])
+
+  // Load products & categories from Supabase on mount
+  useEffect(() => {
+    let isMounted = true
+
+    const loadData = async () => {
+      if (isSupabaseConfigured()) {
+        setIsLoadingProducts(true)
+        const [fetchedProducts, fetchedCategories] = await Promise.all([
+          getProducts(),
+          getCategories(),
+        ])
+        if (isMounted) {
+          if (fetchedProducts && fetchedProducts.length > 0) {
+            setProducts(fetchedProducts)
+          }
+          if (fetchedCategories && fetchedCategories.length > 0) {
+            setCategories(fetchedCategories)
+          }
+          setIsLoadingProducts(false)
+          setIsDbConnected(true)
+        }
+      }
+    }
+
+    loadData()
+
+    // Listen to Supabase auth state if configured
+    if (isSupabaseConfigured()) {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (isMounted) setAuthUser(session?.user ?? null)
+      })
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        if (isMounted) setAuthUser(session?.user ?? null)
+      })
+
+      return () => {
+        isMounted = false
+        subscription.unsubscribe()
+      }
+    }
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   // Persistence effects
   useEffect(() => {
@@ -370,13 +443,43 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
       trackingNumber: `DAC-VIP-${Math.floor(100000 + Math.random() * 900000)}`,
     }
 
+    // 1. Update local state & localStorage immediately for instant UI feedback
     setOrders((prev) => [newOrder, ...prev])
+
+    // 2. Persist to Supabase PostgreSQL in background
+    if (isSupabaseConfigured()) {
+      saveOrderToDatabase(
+        newOrder,
+        {
+          fullName: shippingDetails.fullName,
+          email: shippingDetails.email,
+          phone: shippingDetails.phone,
+          address: shippingDetails.address,
+          city: shippingDetails.city,
+          postalCode: shippingDetails.postalCode,
+          country: shippingDetails.country,
+          promoCode: promoCode || undefined,
+          discountAmount,
+          currencyCode: currency.code,
+          currencyRate: currency.rate,
+        },
+        cart,
+        authUser?.id,
+      )
+    }
+
     clearCart()
     return newOrder
   }
 
   const bookAppointment = (data: AppointmentData) => {
     setAppointments((prev) => [data, ...prev])
+
+    // Persist to Supabase PostgreSQL in background if connected
+    if (isSupabaseConfigured()) {
+      saveAppointmentToDatabase(data, authUser?.id)
+    }
+
     showToast(
       `Appointment confirmed for ${data.date} in ${data.city}. We look forward to welcoming you.`,
     )
@@ -385,6 +488,10 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   return (
     <ShopContext.Provider
       value={{
+        products,
+        categories,
+        isDbConnected,
+        isLoadingProducts,
         cart,
         addToCart,
         updateQuantity,
@@ -431,6 +538,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         createOrder,
         appointments,
         bookAppointment,
+        authUser,
       }}
     >
       {children}

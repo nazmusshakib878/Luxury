@@ -1,10 +1,9 @@
 import React from "react"
 import { Icon } from "../common/Icon"
-import { categories } from "../../data/categories"
 import { useShop } from "../../context/ShopContext"
 
 export const CategoriesSection: React.FC = () => {
-  const { setActiveCategory } = useShop()
+  const { categories, setActiveCategory } = useShop()
 
   const handleCategorySelect = (categoryType: any) => {
     setActiveCategory(categoryType)

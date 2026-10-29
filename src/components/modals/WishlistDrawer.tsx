@@ -1,10 +1,9 @@
 import React from "react"
 import { Icon } from "../common/Icon"
 import { useShop } from "../../context/ShopContext"
-import { products } from "../../data/products"
-
 export const WishlistDrawer: React.FC = () => {
   const {
+    products,
     isWishlistOpen,
     setIsWishlistOpen,
     wishlist,

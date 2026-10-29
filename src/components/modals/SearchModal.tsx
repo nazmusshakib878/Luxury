@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from "react"
 import { Icon } from "../common/Icon"
 import { useShop } from "../../context/ShopContext"
-import { products } from "../../data/products"
-
 export const SearchModal: React.FC = () => {
-  const { isSearchOpen, setIsSearchOpen, setQuickViewProduct, formatPrice } =
-    useShop()
+  const {
+    products,
+    isSearchOpen,
+    setIsSearchOpen,
+    setQuickViewProduct,
+    formatPrice,
+  } = useShop()
 
   const [query, setQuery] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)

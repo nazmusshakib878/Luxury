@@ -1,11 +1,11 @@
 import React from "react"
 import { Icon } from "../common/Icon"
-import { products } from "../../data/products"
 import { useShop } from "../../context/ShopContext"
 import { ProductCategory } from "../../types"
 
 export const ProductGrid: React.FC = () => {
   const {
+    products,
     activeCategory,
     setActiveCategory,
     wishlist,
