@@ -1,4 +1,5 @@
 import React from "react"
+import { Link } from "react-router-dom"
 import { Icon } from "../../components/common/Icon"
 import { IconName } from "../../types"
 
@@ -230,12 +231,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </div>
 
           <div className="flex items-center justify-between pt-2 border-t border-[#22201b]">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="text-[11px] text-[#a19a8d] hover:text-[#aa8b5f] flex items-center gap-1 transition-colors"
             >
               <Icon name="external-link" size={12} /> View Store
-            </a>
+            </Link>
 
             <button
               onClick={onLogout}

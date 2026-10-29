@@ -102,7 +102,7 @@ export function setSupabaseCredentials(url: string, key: string): boolean {
 export async function testSupabaseConnection(
   testUrl?: string,
   testKey?: string,
-): Promise<{ success: boolean message: string details?: any }> {
+): Promise<{ success: boolean; message: string; details?: any }> {
   try {
     const client =
       testUrl && testKey

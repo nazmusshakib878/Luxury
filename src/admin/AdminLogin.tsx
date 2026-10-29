@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { Link } from "react-router-dom"
 import { Icon } from "../components/common/Icon"
 import { useShop } from "../context/ShopContext"
 
@@ -46,13 +47,13 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess }) => {
     <div className="min-h-screen bg-[#0c0b09] text-[#f7f5f0] flex flex-col justify-between p-6">
       {/* Top Header */}
       <div className="flex justify-between items-center max-w-5xl mx-auto w-full pt-4">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="text-xs uppercase font-bold tracking-widest text-[#aa8b5f] flex items-center gap-2 hover:text-[#c2a275] transition-colors"
         >
           <Icon name="arrow" size={14} className="rotate-180" />
           <span>Return to Boutique Storefront</span>
-        </a>
+        </Link>
 
         <span className="text-[10px] uppercase font-bold tracking-widest text-[#70695c] border border-[#2d2a24] px-2.5 py-1">
           Restricted Atelier Area

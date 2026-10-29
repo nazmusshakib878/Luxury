@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { Link } from "react-router-dom"
 import { Icon } from "../../components/common/Icon"
 import { AdminTab } from "./AdminSidebar"
 import { isSupabaseConfigured } from "../../lib/supabase"
@@ -14,7 +15,7 @@ interface AdminTopNavbarProps {
   lowStockCount: number
 }
 
-const TAB_TITLES: Record<AdminTab, { section: string title: string }> = {
+const TAB_TITLES: Record<AdminTab, { section: string; title: string }> = {
   dashboard: { section: "Overview", title: "Executive Operations Dashboard" },
   products: { section: "Catalog", title: "Product Catalog Management" },
   categories: { section: "Catalog", title: "Categories & Collections" },
@@ -228,14 +229,14 @@ export const AdminTopNavbar: React.FC<AdminTopNavbarProps> = ({
         </div>
 
         {/* View Storefront Link */}
-        <a
-          href="/"
+        <Link
+          to="/"
           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-[#aa8b5f] border border-[#aa8b5f]/50 hover:bg-[#aa8b5f] hover:text-[#171713] transition-all rounded-xs"
           title="Return to customer boutique view"
         >
           <Icon name="external-link" size={13} />
           <span>View Store</span>
-        </a>
+        </Link>
 
         {/* User Profile Dropdown */}
         <div className="relative">

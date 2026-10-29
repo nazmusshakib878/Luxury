@@ -1,8 +1,10 @@
 import React, { useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { Icon } from "../common/Icon"
 import { useShop } from "../../context/ShopContext"
 
 export const AccountModal: React.FC = () => {
+  const navigate = useNavigate()
   const {
     isAccountOpen,
     setIsAccountOpen,
@@ -43,7 +45,7 @@ export const AccountModal: React.FC = () => {
     if (result.success) {
       if (result.isAdmin) {
         setIsAccountOpen(false)
-        window.location.href = "/atelier-admin"
+        navigate("/atelier-admin")
       } else {
         setActiveTab("orders")
       }
@@ -120,12 +122,13 @@ export const AccountModal: React.FC = () => {
                 salon bookings.
               </p>
             </div>
-            <a
-              href="/atelier-admin"
+            <Link
+              to="/atelier-admin"
+              onClick={() => setIsAccountOpen(false)}
               className="px-4 py-2 bg-[#aa8b5f] text-[#171713] text-xs font-semibold uppercase tracking-wider hover:bg-[#c2a275] whitespace-nowrap cursor-pointer transition-colors block text-center"
             >
               Open Admin Portal ➔
-            </a>
+            </Link>
           </div>
         )}
 
