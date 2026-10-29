@@ -2,7 +2,7 @@ import React from "react"
 import { Icon } from "../../components/common/Icon"
 import { IconName } from "../../types"
 
-export type AdminTab = "dashboard" | "products" | "categories" | "inventory" | "reviews" | "orders-all" | "orders-pending" | "orders-processing" | "orders-shipped" | "orders-delivered" | "orders-cancelled" | "orders-refunded" | "customers" | "customers-profiles" | "customers-orders" | "analytics" | "reports" | "coupons" | "salon" | "settings" | "profile" | "api"
+export type AdminTab = "dashboard" | "products" | "categories" | "inventory" | "reviews" | "orders-all" | "orders-pending" | "orders-processing" | "orders-shipped" | "orders-delivered" | "orders-cancelled" | "orders-refunded" | "customers" | "customers-profiles" | "customers-orders" | "analytics" | "reports" | "coupons" | "salon" | "settings" | "payments" | "profile" | "api"
 
 interface AdminSidebarProps {
   currentTab: AdminTab
@@ -103,6 +103,11 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
       group: "SYSTEM CONFIGURATION",
       items: [
         { id: "settings", label: "Store Settings", icon: "settings" },
+        {
+          id: "payments",
+          label: "Payment Gateways (bKash/Cards)",
+          icon: "dollar",
+        },
         { id: "profile", label: "Administrator Profile", icon: "shield" },
         { id: "api", label: "Database & API Config", icon: "sparkle" },
       ],

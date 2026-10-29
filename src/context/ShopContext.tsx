@@ -8,7 +8,9 @@ import {
   ToastMessage,
   UserOrder,
   AppointmentData,
+  StoreSettings,
 } from "../types"
+import { DEFAULT_STORE_SETTINGS } from "../admin/services/adminService"
 import { currencies } from "../data/currencies"
 import { products as initialProducts } from "../data/products"
 import { categories as initialCategories } from "../data/categories"
@@ -139,6 +141,10 @@ interface ShopContextType {
 
   // Auth User State
   authUser: any | null
+
+  // Store Settings & Payment Gateways
+  storeSettings: StoreSettings
+  updateStoreSettings: (newSettings: StoreSettings) => Promise<boolean>
 }
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined)
@@ -249,6 +255,69 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
       userProfile?.email?.toLowerCase() === "nazmusshakib335@gmail.com" ||
       userProfile?.email?.toLowerCase().startsWith("admin@"),
   )
+
+  // Synchronize store settings with Supabase if configured
+  const [storeSettings, setStoreSettings] = useState<StoreSettings>(() => {
+    try {
+      const saved = localStorage.getItem("aurelia_store_settings")
+      return saved ? JSON.parse(saved) : DEFAULT_STORE_SETTINGS
+    } catch {
+      return DEFAULT_STORE_SETTINGS
+    }
+  })
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (isSupabaseConfigured()) {
+        try {
+          const { data } = await supabase
+            .from("store_settings")
+            .select("settings")
+            .limit(1)
+            .maybeSingle()
+          if (data?.settings) {
+            setStoreSettings(data.settings)
+            localStorage.setItem(
+              "aurelia_store_settings",
+              JSON.stringify(data.settings),
+            )
+          }
+        } catch (err) {
+          console.warn(
+            "[ShopContext] Failed to fetch store settings from Supabase:",
+            err,
+          )
+        }
+      }
+    }
+    fetchSettings()
+  }, [])
+
+  const updateStoreSettings = async (
+    newSettings: StoreSettings,
+  ): Promise<boolean> => {
+    setStoreSettings(newSettings)
+    try {
+      localStorage.setItem(
+        "aurelia_store_settings",
+        JSON.stringify(newSettings),
+      )
+      if (isSupabaseConfigured()) {
+        await supabase
+          .from("store_settings")
+          .upsert({ id: "default_store", settings: newSettings })
+      }
+      showToast(
+        "Store configuration and payment gateways updated successfully",
+        "success",
+      )
+      return true
+    } catch (err) {
+      console.warn("[ShopContext] Error updating store settings:", err)
+      showToast("Settings updated locally", "info")
+      return true
+    }
+  }
 
   // Admin Data Collections
   const [allAdminOrders, setAllAdminOrders] = useState<UserOrder[]>(orders)
@@ -525,6 +594,24 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   }
 
   const createOrder = (shippingDetails: any): UserOrder => {
+    const paymentMethod = shippingDetails.paymentMethod || "bKash"
+    const paymentStatus =
+      shippingDetails.paymentStatus ||
+      (paymentMethod === "Cash on Delivery" ? "pending" : "paid")
+
+    const isDhaka = (shippingDetails.city || "").toLowerCase().includes("dhaka")
+    const standardFee = isDhaka
+      ? storeSettings.deliveryChargeDhaka
+      : storeSettings.deliveryChargeOutside
+    const deliveryFee =
+      cartSubtotal >= storeSettings.freeShippingThreshold
+        ? 0
+        : shippingDetails.deliveryCharge !== undefined
+          ? shippingDetails.deliveryCharge
+          : standardFee
+
+    const finalGrandTotal = cartFinalTotal + deliveryFee
+
     const newOrder: UserOrder = {
       id: `AUR-${Math.floor(100000 + Math.random() * 900000)}`,
       date: new Date().toLocaleDateString("en-US", {
@@ -538,8 +625,21 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         quantity: item.quantity,
         price: item.product.price,
         image: item.product.image,
+        selectedSize: item.selectedSize,
       })),
-      total: cartFinalTotal,
+      total: finalGrandTotal,
+      subtotal: cartSubtotal,
+      discountAmount,
+      deliveryCharge: deliveryFee,
+      promoCode: promoCode || undefined,
+      paymentMethod,
+      paymentStatus,
+      paymentDetails: shippingDetails.paymentDetails,
+      customerName: shippingDetails.fullName,
+      customerEmail: shippingDetails.email,
+      customerPhone: shippingDetails.phone,
+      shippingCity: shippingDetails.city,
+      shippingAddress: shippingDetails.address,
       trackingNumber: `DAC-VIP-${Math.floor(100000 + Math.random() * 900000)}`,
     }
 
@@ -822,6 +922,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         appointments,
         bookAppointment,
         authUser,
+        storeSettings,
+        updateStoreSettings,
       }}
     >
       {children}

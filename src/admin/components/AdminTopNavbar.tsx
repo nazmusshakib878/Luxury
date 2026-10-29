@@ -53,6 +53,10 @@ const TAB_TITLES: Record<AdminTab, { section: string title: string }> = {
   coupons: { section: "Business", title: "Coupons & Promotional Discounts" },
   salon: { section: "Business", title: "Private Salon Reservations" },
   settings: { section: "System", title: "Store & Delivery Configuration" },
+  payments: {
+    section: "System",
+    title: "Payment Gateways & Financial Settlement (bKash/Cards)",
+  },
   profile: { section: "System", title: "Administrator Profile & Security" },
   api: { section: "System", title: "Database & Supabase API Configuration" },
 }

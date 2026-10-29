@@ -32,6 +32,22 @@ export const StoreSettingsPage: React.FC<StoreSettingsPageProps> = ({
         </p>
       </div>
 
+      {/* Payment Gateways Banner */}
+      <div className="p-4 bg-[#1b1914] border border-[#aa8b5f]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div>
+          <span className="text-[#aa8b5f] font-bold block">
+            Looking for bKash, Nagad & Card Gateways?
+          </span>
+          <span className="text-[#8c8273] text-[11px]">
+            Configure merchant numbers, TrxID validation, and live payment
+            gateways under the dedicated Payment Gateways panel.
+          </span>
+        </div>
+        <span className="text-[11px] font-semibold text-[#81c784] bg-[#81c784]/15 px-3 py-1.5 border border-[#81c784]/30 shrink-0">
+          bKash & Cards Active
+        </span>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6 text-xs">
         {/* General Store Details */}
         <div className="p-6 bg-[#171713] border border-[#2d2a24] space-y-4">

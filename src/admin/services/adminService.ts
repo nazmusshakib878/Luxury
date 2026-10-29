@@ -20,10 +20,39 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   supportPhone: "+880 1700-AURELIA",
   storeAddress: "Gulshan Avenue, Dhaka 1212, Bangladesh",
   currencySymbol: "৳",
-  deliveryChargeDhaka: 80,
-  deliveryChargeOutside: 150,
-  freeShippingThreshold: 20000,
+  deliveryChargeDhaka: 120,
+  deliveryChargeOutside: 200,
+  freeShippingThreshold: 50000,
   lowStockThreshold: 5,
+  paymentGateways: {
+    bkash: {
+      enabled: true,
+      accountType: "merchant",
+      accountNumber: "01711-234567",
+      instructions:
+        "Open bKash App or dial *247# -> Select 'Make Payment' -> Enter Merchant Number: 01711-234567 -> Enter Order Amount -> Enter Order Reference -> Enter PIN. Then submit your bKash Mobile Number and Transaction ID below.",
+      sandboxMode: false,
+    },
+    nagad: {
+      enabled: true,
+      accountType: "merchant",
+      accountNumber: "01819-987654",
+      instructions:
+        "Open Nagad App or dial *167# -> Select 'Merchant Pay' -> Enter Merchant Number: 01819-987654 -> Enter Amount and Reference -> Confirm with PIN. Then enter your Transaction ID below.",
+    },
+    card: {
+      enabled: true,
+      provider: "sslcommerz",
+      storeId: "aureliamaisondk001",
+      sandboxMode: true,
+    },
+    cod: {
+      enabled: true,
+      instructions:
+        "Complimentary white-glove courier hand-delivery with package inspection upon arrival. Settle payment in cash or via POS handheld terminal.",
+      maxOrderLimit: 250000,
+    },
+  },
 }
 
 // Initial Sample Customers

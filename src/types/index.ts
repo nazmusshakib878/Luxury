@@ -1,4 +1,4 @@
-export type IconName = "arrow" | "arrow-up" | "bag" | "check" | "chevron" | "clock" | "heart" | "instagram" | "menu" | "quote" | "search" | "shield" | "sparkle" | "star" | "user" | "x" | "plus" | "minus" | "trash" | "eye" | "calendar" | "lock" | "box" | "tag" | "users" | "chart" | "settings" | "refresh" | "download" | "filter" | "bell" | "printer" | "external-link" | "dollar" | "edit"
+export type IconName = "arrow" | "arrow-up" | "bag" | "check" | "chevron" | "clock" | "heart" | "instagram" | "menu" | "quote" | "search" | "shield" | "sparkle" | "star" | "user" | "x" | "plus" | "minus" | "trash" | "eye" | "calendar" | "lock" | "box" | "tag" | "users" | "chart" | "settings" | "refresh" | "download" | "filter" | "bell" | "printer" | "external-link" | "dollar" | "edit" | "credit-card" | "smartphone" | "copy"
 
 export type ProductCategory = "all" | "leather" | "fragrance" | "silk"
 
@@ -84,6 +84,13 @@ export interface UserOrder {
   promoCode?: string
   paymentMethod?: string
   paymentStatus?: "pending" | "paid" | "refunded" | "failed"
+  paymentDetails?: {
+    walletNumber?: string
+    transactionId?: string
+    cardLast4?: string
+    cardBrand?: string
+    accountType?: string
+  }
   trackingNumber: string
   customerName?: string
   customerEmail?: string
@@ -142,6 +149,46 @@ export interface InventoryLog {
   createdAt: string
 }
 
+export interface BkashConfig {
+  enabled: boolean
+  accountType: "merchant" | "personal"
+  accountNumber: string
+  instructions: string
+  sandboxMode: boolean
+  appKey?: string
+  appSecret?: string
+  username?: string
+  password?: string
+}
+
+export interface NagadConfig {
+  enabled: boolean
+  accountType: "merchant" | "personal"
+  accountNumber: string
+  instructions: string
+}
+
+export interface CardGatewayConfig {
+  enabled: boolean
+  provider: "sslcommerz" | "stripe" | "direct"
+  storeId?: string
+  storePassword?: string
+  sandboxMode: boolean
+}
+
+export interface CodConfig {
+  enabled: boolean
+  instructions: string
+  maxOrderLimit?: number
+}
+
+export interface PaymentGatewaysConfig {
+  bkash: BkashConfig
+  nagad: NagadConfig
+  card: CardGatewayConfig
+  cod: CodConfig
+}
+
 export interface StoreSettings {
   storeName: string
   supportEmail: string
@@ -152,6 +199,7 @@ export interface StoreSettings {
   deliveryChargeOutside: number
   freeShippingThreshold: number
   lowStockThreshold: number
+  paymentGateways?: PaymentGatewaysConfig
 }
 
 export interface AppointmentData {

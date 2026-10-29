@@ -77,6 +77,7 @@ create table if not exists public.orders (
     status text default 'In Atelier' check (status in ('Processing', 'In Atelier', 'Dispatched', 'Delivered', 'Cancelled')),
     payment_method text default 'card',
     payment_status text default 'pending' check (payment_status in ('pending', 'paid', 'refunded', 'failed')),
+    payment_details jsonb default '{}'::jsonb,
     tracking_number text unique not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -488,7 +489,9 @@ create policy "Only admin can insert inventory logs" on public.inventory_logs fo
 create policy "Anyone can view store settings" on public.store_settings for select using (true);
 create policy "Only admin can update store settings" on public.store_settings for update using (public.is_admin());
 
--- Initial Seeds for Coupons & Settings
+-- Migration helper for existing orders table:
+alter table public.orders add column if not exists payment_details jsonb default '{}'::jsonb;
+
 insert into public.coupons (code, discount_type, discount_value, min_order_amount, is_active)
 values
   ('AURELIA10', 'percentage', 10, 5000, true),

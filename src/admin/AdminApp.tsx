@@ -17,6 +17,7 @@ import { AnalyticsPage } from "./pages/AnalyticsPage"
 import { CouponsPage } from "./pages/CouponsPage"
 import { SalonBookingsPage } from "./pages/SalonBookingsPage"
 import { StoreSettingsPage } from "./pages/StoreSettingsPage"
+import { PaymentGatewaysPage } from "./pages/PaymentGatewaysPage"
 import { AdminProfilePage } from "./pages/AdminProfilePage"
 import { ApiDatabasePage } from "./pages/ApiDatabasePage"
 
@@ -424,6 +425,14 @@ export const AdminApp: React.FC = () => {
           {/* Store Settings */}
           {currentTab === "settings" && (
             <StoreSettingsPage
+              settings={storeSettings}
+              onSaveSettings={handleSaveSettings}
+            />
+          )}
+
+          {/* Payment Gateways */}
+          {currentTab === "payments" && (
+            <PaymentGatewaysPage
               settings={storeSettings}
               onSaveSettings={handleSaveSettings}
             />

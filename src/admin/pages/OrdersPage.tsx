@@ -248,15 +248,30 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                       </div>
                     </td>
 
-                    {/* Total */}
+                    {/* Total & Payment */}
                     <td className="p-4">
-                      <strong className="text-sm font-['Cormorant_Garamond',serif] text-[#aa8b5f]">
+                      <strong className="text-sm font-['Cormorant_Garamond',serif] text-[#aa8b5f] block">
                         {formatPrice(order.total)}
                       </strong>
-                      <span className="text-[10px] text-[#8c8273] block uppercase">
-                        {order.paymentMethod || "Direct Card"} ·{" "}
-                        {order.paymentStatus || "Paid"}
-                      </span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[10px] text-white font-medium">
+                          {order.paymentMethod || "bKash"}
+                        </span>
+                        <span
+                          className={`text-[9px] px-1.5 py-0.2 rounded-xs font-semibold uppercase ${
+                            order.paymentStatus === "paid"
+                              ? "bg-[#81c784]/20 text-[#81c784]"
+                              : "bg-[#f7941d]/20 text-[#f7941d]"
+                          }`}
+                        >
+                          {order.paymentStatus || "Paid"}
+                        </span>
+                      </div>
+                      {order.paymentDetails?.transactionId && (
+                        <span className="text-[10px] text-[#aa8b5f] font-mono block mt-0.5">
+                          Trx: {order.paymentDetails.transactionId}
+                        </span>
+                      )}
                     </td>
 
                     {/* Status Changer */}
@@ -366,6 +381,54 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                   selectedOrder.shippingCity ||
                   "Gulshan 2, Dhaka, Bangladesh"}
               </p>
+            </div>
+
+            {/* Payment Gateway Settlement */}
+            <div className="p-4 bg-[#1f1d17] border border-[#2d2a24] space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <h4 className="text-[10px] uppercase font-bold tracking-widest text-[#aa8b5f] m-0">
+                  Payment Gateway Settlement
+                </h4>
+                <span
+                  className={`text-[9px] px-2 py-0.5 rounded-xs font-bold uppercase ${
+                    selectedOrder.paymentStatus === "paid"
+                      ? "bg-[#81c784]/20 text-[#81c784] border border-[#81c784]/30"
+                      : "bg-[#f7941d]/20 text-[#f7941d] border border-[#f7941d]/30"
+                  }`}
+                >
+                  {selectedOrder.paymentStatus || "Paid"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                <div>
+                  <span className="text-[#8c8273] text-[10px] block">
+                    Payment Gateway:
+                  </span>
+                  <strong className="text-white">
+                    {selectedOrder.paymentMethod || "bKash"}
+                  </strong>
+                </div>
+                {selectedOrder.paymentDetails?.transactionId && (
+                  <div>
+                    <span className="text-[#8c8273] text-[10px] block">
+                      Transaction ID (TrxID):
+                    </span>
+                    <strong className="text-[#aa8b5f] font-mono">
+                      {selectedOrder.paymentDetails.transactionId}
+                    </strong>
+                  </div>
+                )}
+                {selectedOrder.paymentDetails?.walletNumber && (
+                  <div>
+                    <span className="text-[#8c8273] text-[10px] block">
+                      Sender Wallet:
+                    </span>
+                    <strong className="text-white font-mono">
+                      {selectedOrder.paymentDetails.walletNumber}
+                    </strong>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Ordered Items */}
@@ -559,11 +622,26 @@ export const OrdersPage: React.FC<OrdersPageProps> = ({
                 </p>
                 <p className="text-[#555] m-0">
                   Method:{" "}
-                  {showInvoiceModal.paymentMethod || "Direct Card / Online"}
+                  <strong>{showInvoiceModal.paymentMethod || "bKash"}</strong>
                 </p>
+                {showInvoiceModal.paymentDetails?.transactionId && (
+                  <p className="text-[#555] m-0 font-mono">
+                    TrxID: {showInvoiceModal.paymentDetails.transactionId}
+                  </p>
+                )}
                 <p className="text-[#555] m-0">
                   Status:{" "}
-                  <strong className="text-[#4caf50]">PAID & VERIFIED</strong>
+                  <strong
+                    className={
+                      showInvoiceModal.paymentStatus === "pending"
+                        ? "text-[#f57c00]"
+                        : "text-[#4caf50]"
+                    }
+                  >
+                    {showInvoiceModal.paymentStatus === "pending"
+                      ? "PENDING (COD / VERIFY)"
+                      : "PAID & VERIFIED"}
+                  </strong>
                 </p>
                 <p className="text-[#555] m-0">
                   Fulfillment: {showInvoiceModal.status}
