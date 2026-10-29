@@ -9,30 +9,58 @@ export const AccountModal: React.FC = () => {
     orders,
     appointments,
     formatPrice,
-    showToast,
+    isAdmin,
+    setIsAdminOpen,
+    userProfile,
+    loginUser,
+    registerUser,
+    logoutUser,
   } = useShop()
 
-  const [activeTab, setActiveTab] = useState<"login" | "register" | "orders">(
+  const [activeTab, setActiveTab] = useState<"orders" | "login" | "register">(
     "orders",
   )
-  const [email, setEmail] = useState("vip.client@aurelia.com.bd")
+  const [email, setEmail] = useState(
+    userProfile?.email || "nazmusshakib335@gmail.com",
+  )
   const [password, setPassword] = useState("••••••••")
-  const [isLoggedIn, setIsLoggedIn] = useState(true)
+  const [firstName, setFirstName] = useState("Nazmus")
+  const [lastName, setLastName] = useState("Shakib")
+  const [regEmail, setRegEmail] = useState("nazmusshakib335@gmail.com")
+  const [regPassword, setRegPassword] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   if (!isAccountOpen) return null
 
-  const handleLogin = (e: React.FormEvent) => {
+  const isLoggedIn = Boolean(userProfile)
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoggedIn(true)
-    setActiveTab("orders")
-    showToast("Welcome back to your Aurélia Client Account.")
+    setIsSubmitting(true)
+    const result = await loginUser(email, password)
+    setIsSubmitting(false)
+    if (result.success) {
+      if (result.isAdmin) {
+        setIsAccountOpen(false)
+        setIsAdminOpen(true)
+      } else {
+        setActiveTab("orders")
+      }
+    }
   }
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoggedIn(true)
-    setActiveTab("orders")
-    showToast("Your Aurélia Client Account has been created.")
+    setIsSubmitting(true)
+    const result = await registerUser(
+      regEmail,
+      regPassword,
+      `${firstName} ${lastName}`.trim(),
+    )
+    setIsSubmitting(false)
+    if (result.success) {
+      setActiveTab("orders")
+    }
   }
 
   return (
@@ -54,12 +82,44 @@ export const AccountModal: React.FC = () => {
           <Icon name="x" size={18} />
         </button>
 
-        <p className="eyebrow !mb-2">
-          <span></span> Maison Aurélia Privé
-        </p>
-        <h2 className="font-['Cormorant_Garamond',serif] text-3xl mb-6">
+        <div className="flex justify-between items-center mb-1">
+          <p className="eyebrow !mb-0">
+            <span></span> Maison Aurélia Privé
+          </p>
+          {isAdmin && (
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#aa8b5f] bg-[#aa8b5f]/15 px-2 py-0.5 border border-[#aa8b5f]/40">
+              👑 Master Admin
+            </span>
+          )}
+        </div>
+
+        <h2 className="font-['Cormorant_Garamond',serif] text-3xl mb-4">
           Client Space
         </h2>
+
+        {/* Master Admin Portal Access Banner */}
+        {isAdmin && (
+          <div className="mb-6 p-4 bg-[#171713] border border-[#aa8b5f] text-[#f7f5f0] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <span className="text-[10px] uppercase tracking-widest text-[#aa8b5f] font-bold block mb-0.5">
+                👑 Executive Administrator Active
+              </span>
+              <p className="text-xs text-[#a19a8d] m-0">
+                You have full access to manage products, pricing, orders, and
+                salon bookings.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setIsAccountOpen(false)
+                setIsAdminOpen(true)
+              }}
+              className="px-4 py-2 bg-[#aa8b5f] text-[#171713] text-xs font-semibold uppercase tracking-wider hover:bg-[#c2a275] whitespace-nowrap cursor-pointer transition-colors"
+            >
+              Open Admin Portal ➔
+            </button>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="luxury-tabs">
@@ -91,10 +151,7 @@ export const AccountModal: React.FC = () => {
           ) : (
             <button
               className="luxury-tab text-[#9e2a2b]"
-              onClick={() => {
-                setIsLoggedIn(false)
-                showToast("You have been signed out.", "info")
-              }}
+              onClick={() => logoutUser()}
             >
               Sign Out
             </button>
@@ -209,6 +266,7 @@ export const AccountModal: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="nazmusshakib335@gmail.com"
               />
             </div>
             <div className="form-group">
@@ -220,9 +278,29 @@ export const AccountModal: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <button type="submit" className="button button-dark w-full mt-4">
-              Sign In to Atelier Account
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="button button-dark w-full mt-4 cursor-pointer"
+            >
+              {isSubmitting ? "Authenticating..." : "Sign In to Account"}
             </button>
+
+            {/* Quick Master Admin Login Button */}
+            <div className="pt-4 border-t border-[var(--line)] text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail("nazmusshakib335@gmail.com")
+                  loginUser("nazmusshakib335@gmail.com", "admin123")
+                }}
+                className="text-xs text-[#8c6e49] hover:underline font-semibold"
+              >
+                👑 Quick Access: Sign in as Master Admin
+                (nazmusshakib335@gmail.com)
+              </button>
+            </div>
           </form>
         )}
 
@@ -232,11 +310,23 @@ export const AccountModal: React.FC = () => {
             <div className="form-grid">
               <div className="form-group">
                 <label>First Name</label>
-                <input type="text" required placeholder="Shakib" />
+                <input
+                  type="text"
+                  required
+                  placeholder="Nazmus"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
               </div>
               <div className="form-group">
                 <label>Last Name</label>
-                <input type="text" required placeholder="Ahmed" />
+                <input
+                  type="text"
+                  required
+                  placeholder="Shakib"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
               </div>
             </div>
             <div className="form-group">
@@ -244,15 +334,29 @@ export const AccountModal: React.FC = () => {
               <input
                 type="email"
                 required
-                placeholder="shakib.ahmed@aurelia.com.bd"
+                placeholder="nazmusshakib335@gmail.com"
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
               />
             </div>
             <div className="form-group">
               <label>Password</label>
-              <input type="password" required minLength={8} />
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={regPassword}
+                onChange={(e) => setRegPassword(e.target.value)}
+              />
             </div>
-            <button type="submit" className="button button-dark w-full mt-4">
-              Create Atelier Membership
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="button button-dark w-full mt-4 cursor-pointer"
+            >
+              {isSubmitting
+                ? "Creating Membership..."
+                : "Create Atelier Membership"}
             </button>
           </form>
         )}

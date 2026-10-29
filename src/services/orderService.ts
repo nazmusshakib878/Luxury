@@ -146,3 +146,92 @@ export async function fetchUserOrdersFromDatabase(
     return null
   }
 }
+
+/**
+ * Admin: Fetches all orders across all customers from Supabase.
+ */
+export async function fetchAllOrdersForAdmin(): Promise<UserOrder[] | null> {
+  if (!isSupabaseConfigured()) {
+    return null
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("orders")
+      .select(`
+        id,
+        created_at,
+        status,
+        total,
+        tracking_number,
+        full_name,
+        email,
+        phone,
+        city,
+        address,
+        order_items (
+          product_name,
+          quantity,
+          unit_price,
+          image
+        )
+      `)
+      .order("created_at", { ascending: false })
+
+    if (error || !data) {
+      console.warn("[orderService] Failed to fetch all orders:", error?.message)
+      return null
+    }
+
+    return data.map((item: any) => ({
+      id: item.id,
+      date: new Date(item.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+      status: item.status,
+      customerName: item.full_name,
+      customerEmail: item.email,
+      customerPhone: item.phone,
+      shippingCity: item.city,
+      items: (item.order_items || []).map((oi: any) => ({
+        productName: oi.product_name,
+        quantity: oi.quantity,
+        price: Number(oi.unit_price),
+        image: oi.image,
+      })),
+      total: Number(item.total),
+      trackingNumber: item.tracking_number,
+    }))
+  } catch (err) {
+    console.warn("[orderService] Exception fetching admin orders:", err)
+    return null
+  }
+}
+
+/**
+ * Admin: Updates the fulfillment status of an order.
+ */
+export async function updateOrderStatusInDb(
+  orderId: string,
+  newStatus: string,
+): Promise<boolean> {
+  if (!isSupabaseConfigured()) return true
+
+  try {
+    const { error } = await supabase
+      .from("orders")
+      .update({ status: newStatus })
+      .eq("id", orderId)
+
+    if (error) {
+      console.warn("[orderService] Update status error:", error.message)
+      return false
+    }
+    return true
+  } catch (err) {
+    console.warn("[orderService] Exception updating order status:", err)
+    return false
+  }
+}

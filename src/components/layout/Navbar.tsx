@@ -18,6 +18,8 @@ export const Navbar: React.FC = () => {
     setIsWishlistOpen,
     setIsSearchOpen,
     setIsAccountOpen,
+    isAdmin,
+    setIsAdminOpen,
   } = useShop()
 
   return (
@@ -89,6 +91,17 @@ export const Navbar: React.FC = () => {
             </span>
           )}
         </button>
+
+        {/* Admin Portal Shortcut if Admin */}
+        {isAdmin && (
+          <button
+            className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-[#aa8b5f]/15 border border-[#aa8b5f] text-[#aa8b5f] hover:bg-[#aa8b5f] hover:text-[#171713] transition-all rounded-xs cursor-pointer"
+            onClick={() => setIsAdminOpen(true)}
+            title="Open Atelier Administrator Dashboard"
+          >
+            <span>👑</span> Admin Portal
+          </button>
+        )}
 
         {/* User Account */}
         <button

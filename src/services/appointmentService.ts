@@ -83,3 +83,74 @@ export async function fetchUserAppointmentsFromDatabase(
     return null
   }
 }
+
+/**
+ * Admin: Fetches all booked salon appointments from Supabase.
+ */
+export async function fetchAllAppointmentsForAdmin(): Promise<AppointmentData[] | null> {
+  if (!isSupabaseConfigured()) {
+    return null
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("appointments")
+      .select("*")
+      .order("preferred_date", { ascending: false })
+
+    if (error || !data) {
+      console.warn(
+        "[appointmentService] Failed to fetch admin appointments:",
+        error?.message,
+      )
+      return null
+    }
+
+    return data.map((item: any) => ({
+      city: item.city,
+      date: item.preferred_date,
+      time: item.preferred_time,
+      advisor: item.advisor,
+      clientName: item.client_name,
+      email: item.email,
+      phone: item.phone,
+      notes: item.notes || undefined,
+      status: item.status,
+    }))
+  } catch (err) {
+    console.warn(
+      "[appointmentService] Exception fetching admin appointments:",
+      err,
+    )
+    return null
+  }
+}
+
+/**
+ * Admin: Updates appointment status (Confirmed, Completed, Cancelled).
+ */
+export async function updateAppointmentStatusInDb(
+  appointmentId: string,
+  status: string,
+): Promise<boolean> {
+  if (!isSupabaseConfigured()) return true
+
+  try {
+    const { error } = await supabase
+      .from("appointments")
+      .update({ status })
+      .eq("id", appointmentId)
+
+    if (error) {
+      console.warn("[appointmentService] Update status error:", error.message)
+      return false
+    }
+    return true
+  } catch (err) {
+    console.warn(
+      "[appointmentService] Exception updating appointment status:",
+      err,
+    )
+    return false
+  }
+}

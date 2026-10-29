@@ -64,7 +64,7 @@ export interface Currency {
 export interface UserOrder {
   id: string
   date: string
-  status: "Processing" | "In Atelier" | "Dispatched" | "Delivered"
+  status: "Processing" | "In Atelier" | "Dispatched" | "Delivered" | "Cancelled"
   items: {
     productName: string
     quantity: number
@@ -73,6 +73,10 @@ export interface UserOrder {
   }[]
   total: number
   trackingNumber: string
+  customerName?: string
+  customerEmail?: string
+  customerPhone?: string
+  shippingCity?: string
 }
 
 export interface AppointmentData {
@@ -84,6 +88,7 @@ export interface AppointmentData {
   email: string
   phone: string
   notes?: string
+  status?: string
 }
 
 export interface ToastMessage {

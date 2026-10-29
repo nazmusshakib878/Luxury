@@ -13,9 +13,30 @@ import { currencies } from "../data/currencies"
 import { products as initialProducts } from "../data/products"
 import { categories as initialCategories } from "../data/categories"
 import { isSupabaseConfigured, supabase } from "../lib/supabase"
-import { getProducts, getCategories } from "../services/productService"
-import { saveOrderToDatabase } from "../services/orderService"
-import { saveAppointmentToDatabase } from "../services/appointmentService"
+import {
+  getProducts,
+  getCategories,
+  createProduct,
+  updateProductInDb,
+  deleteProductFromDb,
+} from "../services/productService"
+import {
+  saveOrderToDatabase,
+  fetchAllOrdersForAdmin,
+  updateOrderStatusInDb,
+} from "../services/orderService"
+import {
+  saveAppointmentToDatabase,
+  fetchAllAppointmentsForAdmin,
+  updateAppointmentStatusInDb,
+} from "../services/appointmentService"
+import {
+  signInUser,
+  signUpUser,
+  signOutUser,
+  getUserProfile,
+  AuthProfile,
+} from "../services/authService"
 
 interface ShopContextType {
   // Products & Categories (Supabase + Local fallback)
@@ -23,6 +44,32 @@ interface ShopContextType {
   categories: Category[]
   isDbConnected: boolean
   isLoadingProducts: boolean
+
+  // Admin & Products Management
+  isAdminOpen: boolean
+  setIsAdminOpen: (open: boolean) => void
+  userProfile: AuthProfile | null
+  isAdmin: boolean
+  loginUser: (
+    email: string,
+    password?: string,
+  ) => Promise<{ success: boolean error?: string isAdmin?: boolean }>
+  registerUser: (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => Promise<{ success: boolean error?: string }>
+  logoutUser: () => Promise<void>
+  addNewProduct: (productData: Omit<Product, "id">) => Promise<boolean>
+  editProduct: (id: number, updates: Partial<Product>) => Promise<boolean>
+  removeProduct: (id: number) => Promise<boolean>
+  updateOrderStatus: (
+    orderId: string,
+    newStatus: UserOrder["status"],
+  ) => Promise<boolean>
+  updateAppointmentStatus: (id: string, status: string) => Promise<boolean>
+  allAdminOrders: UserOrder[]
+  allAdminAppointments: AppointmentData[]
 
   // Cart
   cart: CartItem[]
@@ -182,7 +229,58 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isAppointmentOpen, setIsAppointmentOpen] = useState(false)
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
   const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false)
+  const [isAdminOpen, setIsAdminOpen] = useState(false)
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null)
+
+  // User Profile & Authentication State
+  const [userProfile, setUserProfile] = useState<AuthProfile | null>(() => {
+    try {
+      const saved = localStorage.getItem("aurelia_user_profile")
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
+
+  // Automatically treat nazmusshakib335@gmail.com or profiles with role='admin' as Master Admin
+  const isAdmin = Boolean(
+    userProfile?.role === "admin" ||
+      authUser?.email?.toLowerCase() === "nazmusshakib335@gmail.com" ||
+      userProfile?.email?.toLowerCase() === "nazmusshakib335@gmail.com" ||
+      userProfile?.email?.toLowerCase().startsWith("admin@"),
+  )
+
+  // Admin Data Collections
+  const [allAdminOrders, setAllAdminOrders] = useState<UserOrder[]>(orders)
+  const [allAdminAppointments, setAllAdminAppointments] =
+    useState<AppointmentData[]>(appointments)
+
+  // Keep admin lists synchronized with customer state
+  useEffect(() => {
+    setAllAdminOrders(orders)
+  }, [orders])
+
+  useEffect(() => {
+    setAllAdminAppointments(appointments)
+  }, [appointments])
+
+  // Refresh admin data from Supabase if connected
+  const refreshAdminData = async () => {
+    if (isSupabaseConfigured()) {
+      const [adminOrders, adminApts] = await Promise.all([
+        fetchAllOrdersForAdmin(),
+        fetchAllAppointmentsForAdmin(),
+      ])
+      if (adminOrders && adminOrders.length > 0) setAllAdminOrders(adminOrders)
+      if (adminApts && adminApts.length > 0) setAllAdminAppointments(adminApts)
+    }
+  }
+
+  useEffect(() => {
+    if (isAdmin) {
+      refreshAdminData()
+    }
+  }, [isAdmin])
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([])
@@ -278,6 +376,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
     isAppointmentOpen ||
     isCheckoutOpen ||
     isCurrencyModalOpen ||
+    isAdminOpen ||
     Boolean(quickViewProduct)
 
   const closeAllModals = () => {
@@ -288,6 +387,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsAppointmentOpen(false)
     setIsCheckoutOpen(false)
     setIsCurrencyModalOpen(false)
+    setIsAdminOpen(false)
     setQuickViewProduct(null)
   }
 
@@ -485,6 +585,175 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
     )
   }
 
+  // Authentication & Profile Actions
+  const loginUser = async (email: string, password = "") => {
+    const isMasterAdminEmail =
+      email.toLowerCase() === "nazmusshakib335@gmail.com" ||
+      email.toLowerCase().startsWith("admin@")
+
+    try {
+      if (isSupabaseConfigured()) {
+        const { user, error } = await signInUser(email, password)
+        if (error) {
+          return { success: false, error: error.message }
+        }
+
+        const profile = await getUserProfile(user?.id || "", email)
+        if (profile) {
+          setUserProfile(profile)
+          localStorage.setItem("aurelia_user_profile", JSON.stringify(profile))
+        }
+      } else {
+        // Fallback local mock login
+        const mockProfile: AuthProfile = {
+          id: isMasterAdminEmail ? "admin-master" : "user-client",
+          fullName: isMasterAdminEmail
+            ? "Nazmus Shakib (Master Admin)"
+            : "VIP Client",
+          email,
+          role: isMasterAdminEmail ? "admin" : "customer",
+        }
+        setUserProfile(mockProfile)
+        localStorage.setItem(
+          "aurelia_user_profile",
+          JSON.stringify(mockProfile),
+        )
+      }
+
+      if (isMasterAdminEmail) {
+        showToast(
+          "Welcome Master Administrator. Atelier Admin Portal unlocked.",
+          "success",
+        )
+        setIsAdminOpen(true)
+        return { success: true, isAdmin: true }
+      } else {
+        showToast("Welcome back to your Aurélia Client Account.", "success")
+        return { success: true, isAdmin: false }
+      }
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to sign in" }
+    }
+  }
+
+  const registerUser = async (
+    email: string,
+    password: string,
+    fullName: string,
+  ) => {
+    try {
+      if (isSupabaseConfigured()) {
+        const { error } = await signUpUser(email, password, fullName)
+        if (error) {
+          return { success: false, error: error.message }
+        }
+      }
+
+      const isMasterAdminEmail =
+        email.toLowerCase() === "nazmusshakib335@gmail.com"
+
+      const newProfile: AuthProfile = {
+        id: "new-user-" + Date.now(),
+        fullName,
+        email,
+        role: isMasterAdminEmail ? "admin" : "customer",
+      }
+
+      setUserProfile(newProfile)
+      localStorage.setItem("aurelia_user_profile", JSON.stringify(newProfile))
+      showToast("Your Aurélia Client Account has been created.", "success")
+      return { success: true }
+    } catch (err: any) {
+      return { success: false, error: err.message || "Registration failed" }
+    }
+  }
+
+  const logoutUser = async () => {
+    if (isSupabaseConfigured()) {
+      await signOutUser()
+    }
+    setAuthUser(null)
+    setUserProfile(null)
+    localStorage.removeItem("aurelia_user_profile")
+    setIsAdminOpen(false)
+    showToast("You have been signed out.", "info")
+  }
+
+  // Admin Catalog & Product Actions
+  const addNewProduct = async (productData: Omit<Product, "id">) => {
+    const created = await createProduct(productData)
+    if (created) {
+      setProducts((prev) => [created, ...prev])
+      showToast(`'${created.name}' added to Maison collection.`, "success")
+      return true
+    }
+    showToast("Failed to create product.", "error")
+    return false
+  }
+
+  const editProduct = async (id: number, updates: Partial<Product>) => {
+    const success = await updateProductInDb(id, updates)
+    if (success) {
+      setProducts((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+      )
+      showToast("Product updated successfully.", "success")
+      return true
+    }
+    showToast("Failed to update product.", "error")
+    return false
+  }
+
+  const removeProduct = async (id: number) => {
+    const success = await deleteProductFromDb(id)
+    if (success) {
+      setProducts((prev) => prev.filter((p) => p.id !== id))
+      showToast("Product deleted from collection.", "info")
+      return true
+    }
+    showToast("Failed to delete product.", "error")
+    return false
+  }
+
+  // Admin Order & Fulfillment Actions
+  const updateOrderStatus = async (
+    orderId: string,
+    newStatus: UserOrder["status"],
+  ) => {
+    const success = await updateOrderStatusInDb(orderId, newStatus)
+    if (success) {
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)),
+      )
+      setAllAdminOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)),
+      )
+      showToast(`Order ${orderId} marked as ${newStatus}.`, "success")
+      return true
+    }
+    showToast("Failed to update order status.", "error")
+    return false
+  }
+
+  const updateAppointmentStatus = async (id: string, status: string) => {
+    const success = await updateAppointmentStatusInDb(id, status)
+    if (success) {
+      setAppointments((prev) =>
+        prev.map((a) =>
+          a.advisor === id || a.email === id ? { ...a, status } : a,
+        ),
+      )
+      setAllAdminAppointments((prev) =>
+        prev.map((a) =>
+          a.advisor === id || a.email === id ? { ...a, status } : a,
+        ),
+      )
+      showToast(`Appointment status updated to ${status}.`, "success")
+      return true
+    }
+    return false
+  }
+
   return (
     <ShopContext.Provider
       value={{
@@ -492,6 +761,20 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({
         categories,
         isDbConnected,
         isLoadingProducts,
+        isAdminOpen,
+        setIsAdminOpen,
+        userProfile,
+        isAdmin,
+        loginUser,
+        registerUser,
+        logoutUser,
+        addNewProduct,
+        editProduct,
+        removeProduct,
+        updateOrderStatus,
+        updateAppointmentStatus,
+        allAdminOrders,
+        allAdminAppointments,
         cart,
         addToCart,
         updateQuantity,

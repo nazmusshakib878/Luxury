@@ -17,6 +17,7 @@ import { WishlistDrawer } from "./components/modals/WishlistDrawer"
 import { SearchModal } from "./components/modals/SearchModal"
 import { ProductQuickViewModal } from "./components/modals/ProductQuickViewModal"
 import { AccountModal } from "./components/modals/AccountModal"
+import { AdminModal } from "./components/modals/AdminModal"
 import { AppointmentModal } from "./components/modals/AppointmentModal"
 import { CheckoutModal } from "./components/modals/CheckoutModal"
 import { CurrencyModal } from "./components/modals/CurrencyModal"
@@ -49,6 +50,7 @@ function AureliaApp() {
       <SearchModal />
       <ProductQuickViewModal />
       <AccountModal />
+      <AdminModal />
       <AppointmentModal />
       <CheckoutModal />
       <CurrencyModal />
