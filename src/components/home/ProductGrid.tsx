@@ -15,7 +15,7 @@ export const ProductGrid: React.FC = () => {
     setQuickViewProduct,
   } = useShop()
 
-  const tabs: { label: string value: ProductCategory }[] = [
+  const tabs: { label: string; value: ProductCategory }[] = [
     { label: "All pieces", value: "all" },
     { label: "Leather goods", value: "leather" },
     { label: "Fragrance", value: "fragrance" },

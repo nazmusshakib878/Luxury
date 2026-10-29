@@ -55,12 +55,12 @@ interface ShopContextType {
   loginUser: (
     email: string,
     password?: string,
-  ) => Promise<{ success: boolean error?: string isAdmin?: boolean }>
+  ) => Promise<{ success: boolean; error?: string; isAdmin?: boolean }>
   registerUser: (
     email: string,
     password: string,
     fullName: string,
-  ) => Promise<{ success: boolean error?: string }>
+  ) => Promise<{ success: boolean; error?: string }>
   logoutUser: () => Promise<void>
   addNewProduct: (productData: Omit<Product, "id">) => Promise<boolean>
   editProduct: (id: number, updates: Partial<Product>) => Promise<boolean>

@@ -1,4 +1,5 @@
 import React from "react"
+import { Link } from "react-router-dom"
 import { Icon } from "../components/common/Icon"
 import { useShop } from "../context/ShopContext"
 
@@ -8,13 +9,13 @@ export const AdminAccessDenied: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0c0b09] text-[#f7f5f0] flex flex-col justify-between p-6">
       <div className="max-w-5xl mx-auto w-full pt-4">
-        <a
-          href="/"
+        <Link
+          to="/"
           className="text-xs uppercase font-bold tracking-widest text-[#aa8b5f] flex items-center gap-2 hover:text-[#c2a275]"
         >
           <Icon name="arrow" size={14} className="rotate-180" />
           <span>Return to Boutique Storefront</span>
-        </a>
+        </Link>
       </div>
 
       <div className="max-w-md w-full mx-auto my-auto text-center p-8 bg-[#171713] border border-[#e53935]/40 shadow-2xl rounded-xs space-y-4">
@@ -38,12 +39,12 @@ export const AdminAccessDenied: React.FC = () => {
         </p>
 
         <div className="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
-          <a
-            href="/"
+          <Link
+            to="/"
             className="px-5 py-2.5 bg-[#aa8b5f] hover:bg-[#c2a275] text-[#171713] font-semibold uppercase tracking-wider text-xs transition-colors rounded-xs text-center"
           >
             Go to Customer Boutique
-          </a>
+          </Link>
           <button
             onClick={() => logoutUser()}
             className="px-5 py-2.5 border border-[#3a362f] text-[#8c8273] hover:text-white uppercase font-semibold text-xs rounded-xs cursor-pointer"

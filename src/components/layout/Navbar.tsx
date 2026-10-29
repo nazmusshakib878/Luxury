@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { Link } from "react-router-dom"
 import { Icon } from "../common/Icon"
 import { useShop } from "../../context/ShopContext"
 
@@ -94,13 +95,13 @@ export const Navbar: React.FC = () => {
 
         {/* Admin Portal Shortcut if Admin */}
         {isAdmin && (
-          <a
-            href="/atelier-admin"
+          <Link
+            to="/atelier-admin"
             className="flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-[#aa8b5f]/15 border border-[#aa8b5f] text-[#aa8b5f] hover:bg-[#aa8b5f] hover:text-[#171713] transition-all rounded-xs cursor-pointer"
             title="Open Atelier Administrator Dashboard"
           >
             <span>👑</span> Admin Portal
-          </a>
+          </Link>
         )}
 
         {/* User Account */}
